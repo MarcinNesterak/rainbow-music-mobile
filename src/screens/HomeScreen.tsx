@@ -1,19 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import ActionsSection from '../components/ActionsSection';
 
 const HomeScreen = () => {
   return (
-    <View style={styles.container}>
-      <Text>Ekran Główny</Text>
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.headerTitle}>Witaj, Marcin!</Text>
+      <ActionsSection />
+      {/* Tutaj w przyszłości dodamy kolejne sekcje */}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    margin: 20,
   },
 });
 
