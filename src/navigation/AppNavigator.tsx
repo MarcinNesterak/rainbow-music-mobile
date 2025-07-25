@@ -1,28 +1,47 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 
-// Definiujemy typy dla naszych ekranów, aby mieć silne typowanie
-export type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
+// Ekrany dostępne w dolnym pasku
+export type MainTabParamList = {
   Home: undefined;
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+// Wszystkie ekrany w głównej nawigacji stosu
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  Main: { screen: string }; 
+};
+
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
+const MainTab = createBottomTabNavigator<MainTabParamList>();
+
+const MainNavigator = () => {
+  return (
+    <MainTab.Navigator>
+      <MainTab.Screen name="Home" component={HomeScreen} options={{ title: 'Start' }} />
+    </MainTab.Navigator>
+  );
+};
 
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Logowanie' }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Rejestracja' }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Start' }} />
-      </Stack.Navigator>
+      <RootStack.Navigator 
+        initialRouteName="Login"
+        screenOptions={{ headerShown: false }}
+      >
+        <RootStack.Screen name="Login" component={LoginScreen} />
+        <RootStack.Screen name="Register" component={RegisterScreen} />
+        <RootStack.Screen name="Main" component={MainNavigator} />
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 };
