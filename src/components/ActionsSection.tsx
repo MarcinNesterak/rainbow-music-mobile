@@ -1,29 +1,47 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App'; // Importujemy typy z App.tsx
 
-// Na razie dane na sztywno, docelowo będą pochodzić z backendu
+// Dodajemy 'targetScreen', aby wiedzieć, dokąd nawigować
 const ACTIONS_DATA = [
-  { id: '1', title: 'Co nowego?' },
-  { id: '2', title: 'Moje produkty' },
-  { id: '3', title: 'Graj ulubione' },
-  { id: '4', title: 'Subskrybuj' },
+  { id: '1', title: 'Co nowego?', targetScreen: 'SongList' },
+  { id: '2', title: 'Moje produkty', targetScreen: null },
+  { id: '3', title: 'Graj ulubione', targetScreen: null },
+  { id: '4', title: 'Subskrybuj', targetScreen: null },
 ];
 
-// Definicja pojedynczego elementu listy
-const ActionItem = ({ title }: { title: string }) => (
-  <TouchableOpacity style={styles.item}>
-    <Text style={styles.itemTitle}>{title}</Text>
-  </TouchableOpacity>
-);
+type ActionItemProps = {
+  title: string;
+  targetScreen: keyof RootStackParamList | null;
+};
 
-// Główny komponent sekcji
+const ActionItem = ({ title, targetScreen }: ActionItemProps) => {
+  // Pobieramy obiekt nawigacji za pomocą hooka
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handlePress = () => {
+    // Nawigujemy tylko jeśli cel jest zdefiniowany
+    if (targetScreen) {
+      navigation.navigate(targetScreen);
+    }
+  };
+
+  return (
+    <TouchableOpacity style={styles.item} onPress={handlePress}>
+      <Text style={styles.itemTitle}>{title}</Text>
+    </TouchableOpacity>
+  );
+};
+
 const ActionsSection = () => {
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionTitle}>Szybkie akcje</Text>
       <FlatList
         data={ACTIONS_DATA}
-        renderItem={({ item }) => <ActionItem title={item.title} />}
+        renderItem={({ item }) => <ActionItem title={item.title} targetScreen={item.targetScreen as keyof RootStackParamList | null} />}
         keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}

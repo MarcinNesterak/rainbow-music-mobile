@@ -1,13 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SvgXml } from 'react-native-svg';
 
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
+
+// Pusty komponent jako placeholder
+const PlaceholderScreen = () => <View />;
 
 // --- IKONY SVG ---
 const homeIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`;
@@ -16,11 +15,9 @@ const heartIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 const videoIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>`;
 const profileIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
 
-const TabBarIcon = ({ xml, color, size }: { xml: string, color: string, size: number }) => {
-  return <SvgXml xml={xml} width={size} height={size} fill={color} />;
-};
-
-const PlaceholderScreen = () => <View />;
+const TabBarIcon = ({ xml, color, size }: { xml: string, color: string, size: number }) => (
+  <SvgXml xml={xml} width={size} height={size} fill={color} />
+);
 
 export type MainTabParamList = {
   Home: undefined;
@@ -30,22 +27,15 @@ export type MainTabParamList = {
   Profil: undefined;
 };
 
-// Wszystkie ekrany w głównej nawigacji stosu
-export type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  Main: { screen: string }; 
-};
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
-const MainTab = createBottomTabNavigator<MainTabParamList>();
-
-const MainNavigator = () => {
+const MainTabNavigator = () => {
   return (
-    <MainTab.Navigator
+    <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false,
         tabBarIcon: ({ color, size }) => {
-          let iconXml = homeIconXml; // Domyślna ikona
+          let iconXml = homeIconXml;
           if (route.name === 'Home') iconXml = homeIconXml;
           if (route.name === 'Audio') iconXml = audioIconXml;
           if (route.name === 'Ulubione') iconXml = heartIconXml;
@@ -57,28 +47,13 @@ const MainNavigator = () => {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <MainTab.Screen name="Home" component={HomeScreen} options={{ title: 'Start' }} />
-      <MainTab.Screen name="Audio" component={PlaceholderScreen} />
-      <MainTab.Screen name="Ulubione" component={PlaceholderScreen} />
-      <MainTab.Screen name="Wideo" component={PlaceholderScreen} />
-      <MainTab.Screen name="Profil" component={PlaceholderScreen} />
-    </MainTab.Navigator>
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Start' }} />
+      <Tab.Screen name="Audio" component={PlaceholderScreen} />
+      <Tab.Screen name="Ulubione" component={PlaceholderScreen} />
+      <Tab.Screen name="Wideo" component={PlaceholderScreen} />
+      <Tab.Screen name="Profil" component={PlaceholderScreen} />
+    </Tab.Navigator>
   );
-};
+}
 
-const AppNavigator = () => {
-  return (
-    <NavigationContainer>
-      <RootStack.Navigator 
-        initialRouteName="Login"
-        screenOptions={{ headerShown: false }}
-      >
-        <RootStack.Screen name="Login" component={LoginScreen} />
-        <RootStack.Screen name="Register" component={RegisterScreen} />
-        <RootStack.Screen name="Main" component={MainNavigator} />
-      </RootStack.Navigator>
-    </NavigationContainer>
-  );
-};
-
-export default AppNavigator; 
+export default MainTabNavigator; 

@@ -14,6 +14,24 @@ export interface Song {
 }
 
 /**
+ * Pobiera listę wszystkich piosenek z bazy danych,
+ * sortując je od najnowszych do najstarszych.
+ */
+export const getSongs = async (): Promise<Song[]> => {
+  const { data, error } = await supabase
+    .from('songs')
+    .select('*')
+    .order('created_at', { ascending: false }); // Sortowanie od najnowszych
+
+  if (error) {
+    console.error('Error fetching songs:', error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+};
+
+/**
  * Przeszukuje piosenki w bazie danych na podstawie tytułu.
  * @param query Tekst do wyszukania w tytule piosenki.
  */
