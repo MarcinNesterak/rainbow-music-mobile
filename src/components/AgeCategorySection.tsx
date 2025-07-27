@@ -48,9 +48,10 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   item: {
-    width: 120,
-    height: 120,
-    borderRadius: 60, // Idealne koło
+    backgroundColor: '#F2F2F7',
+    borderRadius: 15, // Zmieniamy na kwadrat z zaokrąglonymi rogami
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
