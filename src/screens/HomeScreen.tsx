@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
 import debounce from 'lodash.debounce';
 import { searchSongs, Song } from '../services/api';
 import ActionsSection from '../components/ActionsSection';
@@ -76,7 +76,7 @@ const HomeScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={clearSearch} disabled={!showResults}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled">
           <Text style={styles.headerTitle}>Witaj, Marcin!</Text>
           <View onLayout={(event) => {
@@ -104,7 +104,7 @@ const HomeScreen = () => {
             <SearchResults results={searchResults} isLoading={isSearching} error={searchError} />
           </View>
         )}
-      </View>
+      </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 };
