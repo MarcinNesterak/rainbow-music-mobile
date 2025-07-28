@@ -5,7 +5,7 @@ import { searchSongs, Song } from '../services/api';
 import ActionsSection from '../components/ActionsSection';
 import AgeCategorySection from '../components/AgeCategorySection';
 import SearchBar from '../components/SearchBar';
-import MyPlaylistsSection from '../components/MyPlaylistsSection';
+import CategoriesSection from '../components/CategoriesSection';
 
 // Komponent do wyświetlania wyników wyszukiwania
 const SearchResults = ({ results, isLoading, error }: { results: Song[], isLoading: boolean, error: string | null }) => {
@@ -88,8 +88,8 @@ const HomeScreen = () => {
           </View>
           
           <ActionsSection />
+          <CategoriesSection />
           <AgeCategorySection />
-          <MyPlaylistsSection />
 
         </ScrollView>
 

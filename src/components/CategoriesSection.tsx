@@ -24,10 +24,10 @@ const PlaylistItem = ({ title, color }: PlaylistItemProps) => {
   );
 };
 
-const MyPlaylistsSection = () => {
+const CategoriesSection = () => {
   return (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionTitle}>Moje playlisty</Text>
+      <Text style={styles.sectionTitle}>Kategorie</Text>
       <FlatList
         data={PLAYLIST_DATA}
         renderItem={({ item, index }) => (
@@ -75,4 +75,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyPlaylistsSection; 
+export default CategoriesSection; 

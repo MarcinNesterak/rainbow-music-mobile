@@ -32,6 +32,24 @@ export const getSongs = async (): Promise<Song[]> => {
 };
 
 /**
+ * Pobiera listę wszystkich piosenek z bazy danych,
+ * sortując je alfabetycznie według tytułu.
+ */
+export const getSongsAlphabetically = async (): Promise<Song[]> => {
+  const { data, error } = await supabase
+    .from('songs')
+    .select('*')
+    .order('title', { ascending: true }); // Sortowanie alfabetyczne A-Z
+
+  if (error) {
+    console.error('Error fetching songs alphabetically:', error);
+    throw new Error(error.message);
+  }
+
+  return data || [];
+};
+
+/**
  * Przeszukuje piosenki w bazie danych na podstawie tytułu.
  * @param query Tekst do wyszukania w tytule piosenki.
  */

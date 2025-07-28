@@ -7,7 +7,7 @@ import { RootStackParamList } from '../../App'; // Importujemy typy z App.tsx
 // Dodajemy 'targetScreen', aby wiedzieć, dokąd nawigować
 const ACTIONS_DATA = [
   { id: '1', title: 'Co nowego?', targetScreen: 'SongList' },
-  { id: '2', title: 'Moje produkty', targetScreen: null },
+  { id: '2', title: 'Biblioteka', targetScreen: 'Library' }, // Zmieniona nazwa i docelowy ekran
   { id: '3', title: 'Graj ulubione', targetScreen: null },
   { id: '4', title: 'Subskrybuj', targetScreen: null },
 ];
