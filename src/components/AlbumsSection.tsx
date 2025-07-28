@@ -1,5 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 
 const ALBUM_DATA = [
   { id: '1', title: 'Album Pierwszy' },
@@ -21,9 +24,13 @@ const AlbumItem = ({ title }: AlbumItemProps) => {
 };
 
 const AlbumsSection = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionTitle}>Albumy</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Albums')}>
+        <Text style={styles.sectionTitle}>Albumy</Text>
+      </TouchableOpacity>
       <FlatList
         data={ALBUM_DATA}
         renderItem={({ item }) => <AlbumItem title={item.title} />}

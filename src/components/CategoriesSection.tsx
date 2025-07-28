@@ -1,5 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 
 const PLAYLIST_COLORS = ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#6E44FF'];
 
@@ -25,9 +28,13 @@ const PlaylistItem = ({ title, color }: PlaylistItemProps) => {
 };
 
 const CategoriesSection = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionTitle}>Kategorie</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
+        <Text style={styles.sectionTitle}>Kategorie</Text>
+      </TouchableOpacity>
       <FlatList
         data={PLAYLIST_DATA}
         renderItem={({ item, index }) => (

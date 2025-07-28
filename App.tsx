@@ -17,6 +17,8 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import MainTabNavigator from './src/navigation/AppNavigator'; // Zmieniona nazwa importu
 import SongListScreen from './src/screens/SongListScreen';
 import LibraryScreen from './src/screens/LibraryScreen'; // Importujemy nowy ekran
+import AlbumsScreen from './src/screens/AlbumsScreen'; // Importujemy nowy ekran
+import CategoriesScreen from './src/screens/CategoriesScreen'; // Importujemy nowy ekran
 
 // Definiujemy typy dla wszystkich ekranów w aplikacji
 export type RootStackParamList = {
@@ -25,6 +27,8 @@ export type RootStackParamList = {
   MainApp: undefined;
   SongList: undefined;
   Library: undefined; // Dodajemy nowy ekran do typów
+  Albums: undefined; // Dodajemy nowy ekran do typów
+  Categories: undefined; // Dodajemy nowy ekran do typów
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -82,6 +86,8 @@ export default function App() {
             <Stack.Screen name="MainApp" component={MainTabNavigator} />
             <Stack.Screen name="SongList" component={SongListScreen} />
             <Stack.Screen name="Library" component={LibraryScreen} /> 
+            <Stack.Screen name="Albums" component={AlbumsScreen} /> 
+            <Stack.Screen name="Categories" component={CategoriesScreen} /> 
           </>
         ) : (
           <>
