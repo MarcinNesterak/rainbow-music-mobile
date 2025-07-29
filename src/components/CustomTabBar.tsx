@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
+// import { BlurView } from '@react-native-community/blur';
 import { SvgXml } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -28,7 +28,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
 
   return (
     <View style={styles.container}>
-      <BlurView style={styles.blurView} blurType="light" blurAmount={10} />
+      {/* <BlurView style={styles.blurView} blurType="light" blurAmount={10} /> */}
       <View style={[styles.tabBar, { paddingBottom: bottomPadding }]}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -68,12 +68,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  blurView: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  // blurView: {
+  //   ...StyleSheet.absoluteFillObject,
+  // },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: '#FFFFFF', // Stały, nieprzezroczysty kolor tła
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },
