@@ -27,14 +27,26 @@ const CATEGORY_FILES: { [key: string]: any } = {
   'podrozne-hity': require('../assets/images/categories/podrozne-hity.jpeg'),
 };
 
+const TITLE_MAP: { [key: string]: string } = {
+  'dzien-ziemi': 'Dzień Ziemi',
+  'dzien-babci-i-dziadka': 'Dzień Babci i Dziadka',
+  'dzien-mamy-i-taty': 'Dzień Mamy i Taty',
+  'tance': 'Tańce',
+  'mikolaj': 'Mikołaj',
+  'swieta-wielkanocne': 'Święta Wielkanocne',
+  'jesien': 'Jesień',
+  'boze-narodzenie': 'Boże Narodzenie',
+  'podrozne-hity': 'Podróżne hity',
+};
+
 const CATEGORY_DATA = Object.keys(CATEGORY_FILES).map(key => {
-  const title = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const defaultTitle = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   return {
     id: key,
-    title: title,
+    title: TITLE_MAP[key] || defaultTitle,
     image: CATEGORY_FILES[key],
   };
-});
+}).sort((a, b) => a.title.localeCompare(b.title, 'pl')); // Sortowanie alfabetyczne z polskimi znakami
 
 type CategoryItemProps = {
   title: string;
