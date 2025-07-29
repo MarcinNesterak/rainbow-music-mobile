@@ -1,28 +1,53 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 
-const PLAYLIST_COLORS = ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#6E44FF'];
-
-const PLAYLIST_DATA = [
-  { id: '1', title: 'Energiczne poranki' },
-  { id: '2', title: 'Spokojne wieczory' },
-  { id: '3', title: 'Do zabawy' },
-  { id: '4', title: 'Do nauki' },
-  { id: '5', title: 'Podróżne hity' },
-];
-
-type PlaylistItemProps = {
-  title: string;
-  color: string;
+const CATEGORY_FILES: { [key: string]: any } = {
+  'do-nauki': require('../assets/images/categories/do-nauki.jpeg'),
+  'dzien-ziemi': require('../assets/images/categories/dzien-ziemi.jpeg'),
+  'po-angielsku': require('../assets/images/categories/po-angielsku.jpeg'),
+  'dzien-babci-i-dziadka': require('../assets/images/categories/dzien-babci-i-dziadka.jpeg'),
+  'do-zabawy': require('../assets/images/categories/do-zabawy.jpeg'),
+  'wiosna': require('../assets/images/categories/wiosna.jpeg'),
+  'dzien-mamy-i-taty': require('../assets/images/categories/dzien-mamy-i-taty.jpeg'),
+  'tance': require('../assets/images/categories/tance.jpeg'),
+  'powitania': require('../assets/images/categories/powitania.jpeg'),
+  'mikolaj': require('../assets/images/categories/mikolaj.jpeg'),
+  'polska': require('../assets/images/categories/polska.jpeg'),
+  'swieta-wielkanocne': require('../assets/images/categories/swieta-wielkanocne.jpeg'),
+  'spokojne-wieczory': require('../assets/images/categories/spokojne-wieczory.jpeg'),
+  'instrumentacje': require('../assets/images/categories/instrumentacje.jpeg'),
+  'lato': require('../assets/images/categories/lato.jpeg'),
+  'energiczne-poranki': require('../assets/images/categories/energiczne-poranki.jpeg'),
+  'jesien': require('../assets/images/categories/jesien.jpeg'),
+  'boze-narodzenie': require('../assets/images/categories/boze-narodzenie.jpeg'),
+  'zima': require('../assets/images/categories/zima.jpeg'),
+  'podrozne-hity': require('../assets/images/categories/podrozne-hity.jpeg'),
 };
 
-const PlaylistItem = ({ title, color }: PlaylistItemProps) => {
+const CATEGORY_DATA = Object.keys(CATEGORY_FILES).map(key => {
+  const title = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  return {
+    id: key,
+    title: title,
+    image: CATEGORY_FILES[key],
+  };
+});
+
+type CategoryItemProps = {
+  title: string;
+  image: any;
+};
+
+const CategoryItem = ({ title, image }: CategoryItemProps) => {
   return (
-    <TouchableOpacity style={[styles.item, { backgroundColor: color }]}>
-      <Text style={styles.itemTitle}>{title}</Text>
+    <TouchableOpacity>
+      <ImageBackground source={image} style={styles.item} imageStyle={{ borderRadius: 15 }}>
+        <View style={styles.textOverlay} />
+        <Text style={styles.itemTitle}>{title}</Text>
+      </ImageBackground>
     </TouchableOpacity>
   );
 };
@@ -36,10 +61,8 @@ const CategoriesSection = () => {
         <Text style={styles.sectionTitle}>Kategorie</Text>
       </TouchableOpacity>
       <FlatList
-        data={PLAYLIST_DATA}
-        renderItem={({ item, index }) => (
-          <PlaylistItem title={item.title} color={PLAYLIST_COLORS[index % PLAYLIST_COLORS.length]} />
-        )}
+        data={CATEGORY_DATA}
+        renderItem={({ item }) => <CategoryItem title={item.title} image={item.image} />}
         keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -71,14 +94,20 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginRight: 15,
     padding: 15,
+    overflow: 'hidden',
+  },
+  textOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 15,
   },
   itemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
 });
 

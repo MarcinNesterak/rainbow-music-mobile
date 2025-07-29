@@ -55,7 +55,7 @@ const AlbumsScreen = ({ navigation }: any) => {
         data={ALBUM_DATA}
         renderItem={({ item }) => <AlbumItem title={item.title} image={item.image} />}
         keyExtractor={(item) => item.id}
-        numColumns={3}
+        numColumns={2} // Zmieniamy na dwie kolumny
         contentContainerStyle={styles.listContent}
       />
     </SafeAreaView>
@@ -82,11 +82,11 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   listContent: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 15, // Większy padding dla 2 kolumn
   },
   albumItem: {
     flex: 1,
-    margin: 5,
+    margin: 8, // Większy margines
     aspectRatio: 1,
   },
   itemImage: {
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
-    padding: 10,
+    padding: 15, // Większy padding wewnątrz
     overflow: 'hidden',
   },
   textOverlay: {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   albumTitle: {
-    fontSize: 14,
+    fontSize: 16, // Większa czcionka dla lepszej czytelności
     fontWeight: 'bold',
     color: '#FFFFFF',
     textShadowColor: 'rgba(0, 0, 0, 0.7)',

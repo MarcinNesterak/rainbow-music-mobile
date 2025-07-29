@@ -1,21 +1,43 @@
 import React from 'react';
-import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 const backArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="black"/></svg>`;
 
-const CATEGORY_COLORS = ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#6E44FF'];
-const CATEGORY_DATA = [
-  { id: '1', title: 'Energiczne poranki' },
-  { id: '2', title: 'Spokojne wieczory' },
-  { id: '3', title: 'Do zabawy' },
-  { id: '4', title: 'Do nauki' },
-  { id: '5', title: 'Podróżne hity' },
-];
+const CATEGORY_FILES: { [key: string]: any } = {
+  'do-nauki': require('../assets/images/categories/do-nauki.jpeg'),
+  'dzien-ziemi': require('../assets/images/categories/dzien-ziemi.jpeg'),
+  'po-angielsku': require('../assets/images/categories/po-angielsku.jpeg'),
+  'dzien-babci-i-dziadka': require('../assets/images/categories/dzien-babci-i-dziadka.jpeg'),
+  'do-zabawy': require('../assets/images/categories/do-zabawy.jpeg'),
+  'wiosna': require('../assets/images/categories/wiosna.jpeg'),
+  'dzien-mamy-i-taty': require('../assets/images/categories/dzien-mamy-i-taty.jpeg'),
+  'tance': require('../assets/images/categories/tance.jpeg'),
+  'powitania': require('../assets/images/categories/powitania.jpeg'),
+  'mikolaj': require('../assets/images/categories/mikolaj.jpeg'),
+  'polska': require('../assets/images/categories/polska.jpeg'),
+  'swieta-wielkanocne': require('../assets/images/categories/swieta-wielkanocne.jpeg'),
+  'spokojne-wieczory': require('../assets/images/categories/spokojne-wieczory.jpeg'),
+  'instrumentacje': require('../assets/images/categories/instrumentacje.jpeg'),
+  'lato': require('../assets/images/categories/lato.jpeg'),
+  'energiczne-poranki': require('../assets/images/categories/energiczne-poranki.jpeg'),
+  'jesien': require('../assets/images/categories/jesien.jpeg'),
+  'boze-narodzenie': require('../assets/images/categories/boze-narodzenie.jpeg'),
+  'zima': require('../assets/images/categories/zima.jpeg'),
+  'podrozne-hity': require('../assets/images/categories/podrozne-hity.jpeg'),
+};
+
+const CATEGORY_DATA = Object.keys(CATEGORY_FILES).map(key => {
+    const title = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return {
+      id: key,
+      title: title,
+      image: CATEGORY_FILES[key],
+    };
+});
 
 const numColumns = 3;
 
-// Funkcja dodająca puste elementy, aby wypełnić ostatni wiersz siatki
 const formatData = (data: any[], columns: number) => {
   const dataCopy = [...data];
   const numberOfFullRows = Math.floor(dataCopy.length / columns);
@@ -27,13 +49,16 @@ const formatData = (data: any[], columns: number) => {
   return dataCopy;
 };
 
-const CategoryItem = ({ item, color }: { item: { id: string, title?: string, empty?: boolean }, color: string }) => {
+const CategoryItem = ({ item }: { item: { id: string, title?: string, image?: any, empty?: boolean } }) => {
   if (item.empty) {
     return <View style={[styles.categoryItem, styles.itemEmpty]} />;
   }
   return (
-    <TouchableOpacity style={[styles.categoryItem, { backgroundColor: color }]}>
-      <Text style={styles.categoryTitle}>{item.title}</Text>
+    <TouchableOpacity style={styles.categoryItem}>
+      <ImageBackground source={item.image} style={styles.itemImage} imageStyle={{ borderRadius: 15 }}>
+        <View style={styles.textOverlay} />
+        <Text style={styles.categoryTitle}>{item.title}</Text>
+      </ImageBackground>
     </TouchableOpacity>
   );
 };
@@ -49,7 +74,7 @@ const CategoriesScreen = ({ navigation }: any) => {
       </View>
       <FlatList
         data={formatData(CATEGORY_DATA, numColumns)}
-        renderItem={({ item, index }) => <CategoryItem item={item} color={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />}
+        renderItem={({ item }) => <CategoryItem item={item} />}
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
         contentContainerStyle={styles.listContent}
@@ -83,22 +108,31 @@ const styles = StyleSheet.create({
   categoryItem: {
     flex: 1,
     aspectRatio: 1,
-    borderRadius: 15,
     margin: 5,
+  },
+  itemImage: {
+    flex: 1,
+    borderRadius: 15,
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
     padding: 10,
+    overflow: 'hidden',
   },
   itemEmpty: {
     backgroundColor: 'transparent',
+  },
+  textOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 15,
   },
   categoryTitle: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
 });
 
