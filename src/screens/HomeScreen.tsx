@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView, Platform, StatusBar } from 'react-native';
 import debounce from 'lodash.debounce';
 import { searchSongs, Song } from '../services/api';
 import ActionsSection from '../components/ActionsSection';
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'transparent', // Przywracamy przezroczyste tło
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Dodajemy padding dla Androida
   },
   headerTitle: {
     fontSize: 28,

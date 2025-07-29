@@ -107,6 +107,8 @@ const styles = StyleSheet.create({
     marginRight: 15,
     padding: 15,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   textOverlay: {
     ...StyleSheet.absoluteFillObject,

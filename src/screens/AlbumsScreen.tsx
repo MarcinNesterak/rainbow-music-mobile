@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 15, // Większy padding wewnątrz
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   textOverlay: {
     ...StyleSheet.absoluteFillObject,

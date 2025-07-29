@@ -130,6 +130,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 10,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   itemEmpty: {
     backgroundColor: 'transparent',

@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   item: {
-    // Usunięto backgroundColor, bo teraz mamy obraz
     borderRadius: 15,
     width: 140,
     height: 140,
@@ -93,7 +92,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginRight: 15,
     padding: 15,
-    overflow: 'hidden', // Potrzebne dla borderRadius w ImageBackground na Androidzie
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   textOverlay: {
     ...StyleSheet.absoluteFillObject,
