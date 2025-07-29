@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
+import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 
 const MONTH_ORDER = [
   'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 
@@ -51,7 +51,7 @@ const AlbumItem = ({ title, image }: AlbumItemProps) => {
 };
 
 const AlbumsSection = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
 
   return (
     <View style={styles.sectionContainer}>
@@ -93,8 +93,6 @@ const styles = StyleSheet.create({
     marginRight: 15,
     padding: 15,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
   },
   textOverlay: {
     ...StyleSheet.absoluteFillObject,
