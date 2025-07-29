@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { getSongs, Song } from '../services/api';
 import { SvgXml } from 'react-native-svg';
 
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10, // Dodajemy padding dla Androida
   },
   backButton: {
     padding: 5,

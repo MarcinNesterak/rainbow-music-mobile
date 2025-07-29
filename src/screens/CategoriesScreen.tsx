@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground, Platform, StatusBar } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 const backArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="black"/></svg>`;
@@ -98,13 +98,14 @@ const CategoriesScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF', // Upewniamy się, że tło jest białe
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10, // Dodajemy padding dla Androida
   },
   backButton: {
     padding: 5,

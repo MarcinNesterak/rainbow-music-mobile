@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { getSongsAlphabetically, Song } from '../services/api'; // Zmieniony import
 import { SvgXml } from 'react-native-svg';
 
@@ -60,7 +60,7 @@ const LibraryScreen = ({ navigation }: any) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <SvgXml xml={backArrowIconXml} width="28" height="28" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Biblioteka</Text> 
+        <Text style={styles.headerTitle}>Biblioteka</Text>
       </View>
       <FlatList
         data={songs}
@@ -75,7 +75,7 @@ const LibraryScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF',
   },
   center: {
     justifyContent: 'center',
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10, // Dodajemy padding dla Androida
   },
   backButton: {
     padding: 5,

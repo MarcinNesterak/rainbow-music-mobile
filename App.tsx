@@ -14,11 +14,11 @@ import { View, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from './src/services/supabase';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
-import MainTabNavigator from './src/navigation/AppNavigator'; // Zmieniona nazwa importu
+import MainTabNavigator from './src/navigation/AppNavigator';
 import SongListScreen from './src/screens/SongListScreen';
-import LibraryScreen from './src/screens/LibraryScreen'; // Importujemy nowy ekran
-import AlbumsScreen from './src/screens/AlbumsScreen'; // Importujemy nowy ekran
-import CategoriesScreen from './src/screens/CategoriesScreen'; // Importujemy nowy ekran
+import LibraryScreen from './src/screens/LibraryScreen';
+import AlbumsScreen from './src/screens/AlbumsScreen';
+import CategoriesScreen from './src/screens/CategoriesScreen';
 
 // Definiujemy typy dla wszystkich ekranów w aplikacji
 export type RootStackParamList = {
@@ -26,9 +26,9 @@ export type RootStackParamList = {
   Register: undefined;
   MainApp: undefined;
   SongList: undefined;
-  Library: undefined; // Dodajemy nowy ekran do typów
-  Albums: undefined; // Dodajemy nowy ekran do typów
-  Categories: undefined; // Dodajemy nowy ekran do typów
+  Library: undefined;
+  Albums: undefined;
+  Categories: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,7 +41,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ... (useEffect bez zmian)
     const fetchSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -74,10 +73,10 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        screenOptions={{ 
-          headerShown: false, 
-          animation: 'slide_from_right' 
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right'
         }}
         initialRouteName={FORCE_LOGIN || (session && session.user) ? "MainApp" : "Login"}
       >
@@ -85,9 +84,9 @@ export default function App() {
           <>
             <Stack.Screen name="MainApp" component={MainTabNavigator} />
             <Stack.Screen name="SongList" component={SongListScreen} />
-            <Stack.Screen name="Library" component={LibraryScreen} /> 
-            <Stack.Screen name="Albums" component={AlbumsScreen} /> 
-            <Stack.Screen name="Categories" component={CategoriesScreen} /> 
+            <Stack.Screen name="Library" component={LibraryScreen} />
+            <Stack.Screen name="Albums" component={AlbumsScreen} />
+            <Stack.Screen name="Categories" component={CategoriesScreen} />
           </>
         ) : (
           <>

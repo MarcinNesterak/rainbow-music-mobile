@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../../App'; // Poprawiony import
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Tutaj będzie logika logowania
+    // Na razie nawigujemy do ekranu głównego
+    navigation.navigate('MainApp');
+  };
 
   return (
     <View style={styles.container}>
@@ -34,7 +40,7 @@ const LoginScreen = ({ navigation }: Props) => {
       
       <TouchableOpacity 
         style={styles.button} 
-        onPress={() => navigation.replace('Main', { screen: 'Home' })}
+        onPress={handleLogin}
       >
         <Text style={styles.buttonText}>Zaloguj się</Text>
       </TouchableOpacity>
@@ -53,9 +59,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // Przywracamy białe tło
   },
   logo: {
     width: 200,

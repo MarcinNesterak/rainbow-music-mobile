@@ -49,9 +49,6 @@ const MainTabNavigator = () => {
         },
         tabBarActiveTintColor: '#6E44FF',
         tabBarInactiveTintColor: 'gray',
-        sceneContainerStyle: {
-          backgroundColor: 'transparent'
-        }
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Start' }} />

@@ -114,7 +114,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // Przywracamy białe tło
   },
   headerTitle: {
     fontSize: 28,
