@@ -8,7 +8,7 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from './src/services/supabase';
@@ -19,6 +19,17 @@ import SongListScreen from './src/screens/SongListScreen';
 import LibraryScreen from './src/screens/LibraryScreen';
 import AlbumsScreen from './src/screens/AlbumsScreen';
 import CategoriesScreen from './src/screens/CategoriesScreen';
+import GlobalBackground from './src/components/GlobalBackground';
+
+// Definiujemy nasz własny motyw, aby tło nawigacji było przezroczyste
+const TransparentTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+    card: 'transparent',
+  },
+};
 
 // Definiujemy typy dla wszystkich ekranów w aplikacji
 export type RootStackParamList = {
@@ -72,29 +83,31 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: 'slide_from_right'
-        }}
-        initialRouteName={FORCE_LOGIN || (session && session.user) ? "MainApp" : "Login"}
-      >
-        {FORCE_LOGIN || (session && session.user) ? (
-          <>
-            <Stack.Screen name="MainApp" component={MainTabNavigator} />
-            <Stack.Screen name="SongList" component={SongListScreen} />
-            <Stack.Screen name="Library" component={LibraryScreen} />
-            <Stack.Screen name="Albums" component={AlbumsScreen} />
-            <Stack.Screen name="Categories" component={CategoriesScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GlobalBackground>
+      <NavigationContainer theme={TransparentTheme}>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right'
+          }}
+          initialRouteName={FORCE_LOGIN || (session && session.user) ? "MainApp" : "Login"}
+        >
+          {FORCE_LOGIN || (session && session.user) ? (
+            <>
+              <Stack.Screen name="MainApp" component={MainTabNavigator} />
+              <Stack.Screen name="SongList" component={SongListScreen} />
+              <Stack.Screen name="Library" component={LibraryScreen} />
+              <Stack.Screen name="Albums" component={AlbumsScreen} />
+              <Stack.Screen name="Categories" component={CategoriesScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GlobalBackground>
   );
 }

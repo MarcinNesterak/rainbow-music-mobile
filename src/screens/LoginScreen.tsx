@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#FFFFFF', // Przywracamy białe tło
+    backgroundColor: 'transparent', // Przywracamy przezroczyste tło
   },
   logo: {
     width: 200,

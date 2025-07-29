@@ -114,7 +114,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Przywracamy białe tło
+    backgroundColor: 'transparent', // Przywracamy przezroczyste tło
   },
   headerTitle: {
     fontSize: 28,

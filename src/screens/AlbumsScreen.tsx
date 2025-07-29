@@ -65,7 +65,7 @@ const AlbumsScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Upewniamy się, że tło jest białe
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',

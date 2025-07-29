@@ -75,7 +75,7 @@ const LibraryScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   center: {
     justifyContent: 'center',
