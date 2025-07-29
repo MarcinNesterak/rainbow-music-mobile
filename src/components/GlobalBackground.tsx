@@ -7,7 +7,6 @@ const GlobalBackground = ({ children }: { children: React.ReactNode }) => {
       source={require('../assets/images/tapeta.png')}
       style={styles.background}
       resizeMode="cover"
-      blurRadius={5} // Lekkie rozmycie dla subtelnego efektu
     >
       <View style={styles.overlay}>
         {children}
@@ -22,7 +21,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Bardzo lekka biała warstwa
   }
 });
 

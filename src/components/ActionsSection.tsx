@@ -66,13 +66,13 @@ const styles = StyleSheet.create({
   },
   item: {
     backgroundColor: '#F2F2F7',
-    paddingVertical: 20,
+    paddingVertical: 15, // Zmniejszamy padding pionowy
     paddingHorizontal: 25,
     borderRadius: 15,
     marginRight: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    height: 100,
+    height: 70, // Zmniejszamy wysokość
   },
   itemTitle: {
     fontSize: 16,

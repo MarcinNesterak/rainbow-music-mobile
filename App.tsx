@@ -15,10 +15,6 @@ import { supabase } from './src/services/supabase';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import MainTabNavigator from './src/navigation/AppNavigator';
-import SongListScreen from './src/screens/SongListScreen';
-import LibraryScreen from './src/screens/LibraryScreen';
-import AlbumsScreen from './src/screens/AlbumsScreen';
-import CategoriesScreen from './src/screens/CategoriesScreen';
 import GlobalBackground from './src/components/GlobalBackground';
 
 // Definiujemy nasz własny motyw, aby tło nawigacji było przezroczyste
@@ -36,10 +32,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   MainApp: undefined;
-  SongList: undefined;
-  Library: undefined;
-  Albums: undefined;
-  Categories: undefined;
+  // Usunięto resztę, bo są w HomeStackNavigator
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -95,10 +88,6 @@ export default function App() {
           {FORCE_LOGIN || (session && session.user) ? (
             <>
               <Stack.Screen name="MainApp" component={MainTabNavigator} />
-              <Stack.Screen name="SongList" component={SongListScreen} />
-              <Stack.Screen name="Library" component={LibraryScreen} />
-              <Stack.Screen name="Albums" component={AlbumsScreen} />
-              <Stack.Screen name="Categories" component={CategoriesScreen} />
             </>
           ) : (
             <>
