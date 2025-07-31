@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import { getSongs, Song } from '../services/api';
+import { searchSongs, Song } from '../services/api';
 import { SvgXml } from 'react-native-svg';
 
 // Ikona strzałki "wstecz"
@@ -15,7 +15,7 @@ const SongListScreen = ({ navigation }: any) => {
     const fetchSongs = async () => {
       try {
         setLoading(true);
-        const fetchedSongs = await getSongs();
+        const fetchedSongs = await searchSongs('');
         setSongs(fetchedSongs);
         setError(null);
       } catch (e: any) {

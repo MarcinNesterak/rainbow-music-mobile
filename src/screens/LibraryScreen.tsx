@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import { getSongsAlphabetically, Song } from '../services/api'; // Zmieniony import
+import { searchSongs, Song } from '../services/api';
 import { SvgXml } from 'react-native-svg';
 
 // Ikona strzałki "wstecz"
@@ -15,7 +15,7 @@ const LibraryScreen = ({ navigation }: any) => {
     const fetchSongs = async () => {
       try {
         setLoading(true);
-        const fetchedSongs = await getSongsAlphabetically(); // Użycie nowej funkcji
+        const fetchedSongs = await searchSongs(''); // Tymczasowe użycie searchSongs
         setSongs(fetchedSongs);
         setError(null);
       } catch (e: any) {
