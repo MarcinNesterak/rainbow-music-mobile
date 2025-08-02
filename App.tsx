@@ -6,16 +6,24 @@
  */
 
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
-import { Session } from '@supabase/supabase-js';
+import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, ActivityIndicator, Alert } from 'react-native';
-import { supabase } from './src/services/supabase';
+import { View, ActivityIndicator } from 'react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import MainTabNavigator from './src/navigation/AppNavigator';
 import GlobalBackground from './src/components/GlobalBackground';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+
+const linking = {
+  prefixes: ['com.rainbowmusicmobile://'],
+  config: {
+    screens: {
+      Login: 'login',
+    },
+  },
+};
 
 // Definiujemy nasz własny motyw, aby tło nawigacji było przezroczyste
 const TransparentTheme = {
@@ -37,35 +45,8 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// --- SKRÓT DEWELOPERSKI: Pomiń logowanie ---
-const FORCE_LOGIN = true;
-
-export default function App() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-      } catch (error) {
-        Alert.alert("Błąd krytyczny", "Nie udało się połączyć z serwerem.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+const AppContent = () => {
+  const { session, loading } = useAuth();
 
   if (loading) {
     return (
@@ -77,15 +58,15 @@ export default function App() {
 
   return (
     <GlobalBackground>
-      <NavigationContainer theme={TransparentTheme}>
+      <NavigationContainer theme={TransparentTheme} linking={linking}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
             animation: 'slide_from_right'
           }}
-          initialRouteName={FORCE_LOGIN || (session && session.user) ? "MainApp" : "Login"}
+          initialRouteName={session && session.user ? "MainApp" : "Login"}
         >
-          {FORCE_LOGIN || (session && session.user) ? (
+          {session && session.user ? (
             <>
               <Stack.Screen name="MainApp" component={MainTabNavigator} />
             </>
@@ -98,5 +79,13 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </GlobalBackground>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

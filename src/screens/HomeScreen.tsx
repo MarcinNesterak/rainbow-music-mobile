@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView, Platform, StatusBar } from 'react-native';
 import debounce from 'lodash.debounce';
 import { searchSongs, Song } from '../services/api';
-import ActionsSection from '../components/ActionsSection';
-import AgeCategorySection from '../components/AgeCategorySection';
+import MyPlaylistsSection from '../components/MyPlaylistsSection';
 import SearchBar from '../components/SearchBar';
 import CategoriesSection from '../components/CategoriesSection';
 import AlbumsSection from '../components/AlbumsSection'; // Import nowej sekcji
@@ -88,11 +87,9 @@ const HomeScreen = () => {
             <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
           </View>
           
-          <ActionsSection />
+          <MyPlaylistsSection />
           <AlbumsSection /> 
           <CategoriesSection /> 
-          <AgeCategorySection />
-
         </ScrollView>
 
         {showResults && searchBarLayout && (

@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground, Platform, StatusBar } from 'react-native';
 import { SvgXml } from 'react-native-svg';
+import { Album } from '../services/api'; // Załóżmy, że mamy taki typ
+import { useHeaderHeight } from '@react-navigation/elements';
+import GlobalBackground from '../components/GlobalBackground';
 
 const backArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="black"/></svg>`;
 
@@ -42,30 +45,28 @@ const AlbumItem = ({ title, image }: { title: string, image: any }) => (
   </TouchableOpacity>
 );
 
-const AlbumsScreen = ({ navigation }: any) => {
+const AlbumsScreen = () => {
+  const headerHeight = useHeaderHeight();
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <SvgXml xml={backArrowIconXml} width="28" height="28" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Albumy</Text>
-      </View>
-      <FlatList
-        data={ALBUM_DATA}
-        renderItem={({ item }) => <AlbumItem title={item.title} image={item.image} />}
-        keyExtractor={(item) => item.id}
-        numColumns={2} // Zmieniamy na dwie kolumny
-        contentContainerStyle={styles.listContent}
-      />
-    </SafeAreaView>
+    <GlobalBackground>
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={ALBUM_DATA}
+          renderItem={({ item }) => <AlbumItem title={item.title} image={item.image} />}
+          keyExtractor={(item) => item.id}
+          numColumns={2} // Zmieniamy na dwie kolumny
+          contentContainerStyle={[styles.listContent, { paddingTop: headerHeight }]}
+        />
+      </SafeAreaView>
+    </GlobalBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent', // Zmieniamy tło na przezroczyste
   },
   header: {
     flexDirection: 'row',

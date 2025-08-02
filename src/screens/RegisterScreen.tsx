@@ -1,14 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App'; // Poprawiony import
+import { RootStackParamList } from '../../App';
+import { supabase } from '../services/supabase';
 
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Błąd', 'Hasła nie są takie same.');
+      return;
+    }
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+
+    setLoading(false);
+    if (error) {
+      Alert.alert('Błąd rejestracji', error.message);
+    } else if (data.session) {
+      // Automatyczne zalogowanie po udanej rejestracji
+      Alert.alert('Sukces', 'Rejestracja pomyślna! Zostałeś zalogowany.');
+    } else if (data.user) {
+        Alert.alert(
+            'Sukces',
+            'Rejestracja pomyślna! Sprawdź swoją skrzynkę mailową, aby potwierdzić konto.'
+        );
+        navigation.navigate('Login');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -40,9 +68,10 @@ const RegisterScreen = () => {
       
       <TouchableOpacity 
         style={styles.button} 
-        onPress={() => { /* Logika Rejestracji */ }}
+        onPress={handleRegister}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>Zarejestruj się</Text>
+        {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Zarejestruj się</Text>}
       </TouchableOpacity>
       
       <View style={styles.footer}>

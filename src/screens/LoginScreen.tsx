@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App'; // Poprawiony import
+import { supabase } from '../services/supabase';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Tutaj będzie logika logowania
-    // Na razie nawigujemy do ekranu głównego
-    navigation.navigate('MainApp');
+  const handleLogin = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      Alert.alert('Błąd logowania', error.message);
+    }
+    // Nawigacja zostanie obsłużona globalnie przez AuthContext
+    setLoading(false);
   };
 
   return (
@@ -41,8 +51,13 @@ const LoginScreen = ({ navigation }: Props) => {
       <TouchableOpacity 
         style={styles.button} 
         onPress={handleLogin}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>Zaloguj się</Text>
+        {loading ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>Zaloguj się</Text>
+        )}
       </TouchableOpacity>
       
       <View style={styles.footer}>

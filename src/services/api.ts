@@ -31,6 +31,7 @@ export interface Playlist {
   id: string;
   user_id: string;
   name: string;
+  cover_color: string | null;
   songs?: Song[]; // Opcjonalnie
 }
 
@@ -119,16 +120,28 @@ export const getUserPlaylists = async (userId: string): Promise<Playlist[]> => {
 /**
  * Tworzy nową playlistę.
  */
-export const createPlaylist = async (name: string, userId: string): Promise<Playlist> => {
+export const createPlaylist = async (name: string, userId: string, color: string): Promise<Playlist> => {
     const { data, error } = await supabase
       .from('playlists')
-      .insert({ name, user_id: userId })
+      .insert({ name, user_id: userId, cover_color: color })
       .select()
       .single();
 
     if (error) throw new Error(error.message);
     return data;
 }
+
+/**
+ * Usuwa playlistę.
+ */
+export const deletePlaylist = async (playlistId: string) => {
+    const { error } = await supabase
+      .from('playlists')
+      .delete()
+      .eq('id', playlistId);
+    
+    if (error) throw new Error(error.message);
+};
 
 /**
  * Dodaje piosenkę do playlisty.
@@ -140,6 +153,20 @@ export const addSongToPlaylist = async (playlistId: string, songId: string, orde
     
     if (error) throw new Error(error.message);
 }
+
+/**
+ * Pobiera piosenki dla konkretnej playlisty, posortowane według kolejności.
+ */
+export const getSongsByPlaylist = async (playlistId: string): Promise<Song[]> => {
+    const { data, error } = await supabase
+      .from('playlist_songs')
+      .select('songs(*)')
+      .eq('playlist_id', playlistId)
+      .order('song_order', { ascending: true });
+  
+    if (error) throw new Error(error.message);
+    return data?.map(item => item.songs as unknown as Song).filter(Boolean) || [];
+};
 
 // --- OPERACJE NA ULUBIONYCH (FAVORITES) ---
 
