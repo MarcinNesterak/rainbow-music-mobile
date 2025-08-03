@@ -11,6 +11,7 @@ type CategoryItemProps = {
 };
 
 const CategoryItem = ({ item }: CategoryItemProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const imageUrl = item.icon_image_path
     ? supabase.storage.from('category-icons').getPublicUrl(item.icon_image_path).data.publicUrl
     : null;
@@ -20,7 +21,7 @@ const CategoryItem = ({ item }: CategoryItemProps) => {
     : require('../assets/images/logo.png');
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => navigation.navigate('SongList', { type: 'category', id: item.id, name: item.name, imageUrl: imageUrl })}>
       <ImageBackground source={imageSource} style={styles.item} imageStyle={{ borderRadius: 15 }}>
         <View style={styles.textOverlay} />
         <Text style={styles.itemTitle}>{item.name}</Text>

@@ -11,19 +11,19 @@ type AlbumItemProps = {
 };
 
 const AlbumItem = ({ item }: AlbumItemProps) => {
-  // Krok 2: Budowanie pełnego URL do obrazka
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const imageUrl = item.cover_image_path
     ? supabase.storage.from('album-art').getPublicUrl(item.cover_image_path).data.publicUrl
     : null;
 
-  console.log('Attempting to load image for:', item.name, 'URL:', imageUrl); // DEBUG: Wyświetl URL w konsoli
+  console.log('Attempting to load image for:', item.name, 'URL:', imageUrl);
 
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/images/logo.png');
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => navigation.navigate('SongList', { type: 'album', id: item.id, name: item.name, imageUrl: imageUrl })}>
       <ImageBackground source={imageSource} style={styles.item} imageStyle={{ borderRadius: 15 }}>
         <View style={styles.textOverlay} />
         <Text style={styles.itemTitle}>{item.name}</Text>

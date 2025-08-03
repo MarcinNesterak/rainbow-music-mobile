@@ -1,61 +1,74 @@
-import React from 'react';
-import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground, Platform, StatusBar } from 'react-native';
-import { SvgXml } from 'react-native-svg';
-import { Album } from '../services/api'; // Załóżmy, że mamy taki typ
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, FlatList, SafeAreaView, TouchableOpacity, ImageBackground, ActivityIndicator, Platform, StatusBar } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../navigation/HomeStackNavigator';
+import { getAlbums, Album } from '../services/api';
+import { supabase } from '../services/supabase';
 import { useHeaderHeight } from '@react-navigation/elements';
 import GlobalBackground from '../components/GlobalBackground';
 
-const backArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="black"/></svg>`;
+const AlbumItem = ({ item }: { item: Album }) => {
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  
+  const imageUrl = item.cover_image_path
+    ? supabase.storage.from('album-art').getPublicUrl(item.cover_image_path).data.publicUrl
+    : null;
 
-const MONTH_ORDER = [
-  'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 
-  'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
-];
+  const imageSource = imageUrl
+    ? { uri: imageUrl }
+    : require('../assets/images/logo.png');
 
-const ALBUM_IMAGES: { [key: string]: any } = {
-  'styczen': require('../assets/images/albums/styczen.jpeg'),
-  'luty': require('../assets/images/albums/luty.jpeg'),
-  'marzec': require('../assets/images/albums/marzec.jpeg'),
-  'kwiecien': require('../assets/images/albums/kwiecien.jpeg'),
-  'maj': require('../assets/images/albums/maj.jpeg'),
-  'czerwiec': require('../assets/images/albums/czerwiec.jpeg'),
-  'lipiec': require('../assets/images/albums/lipiec.jpeg'),
-  'sierpien': require('../assets/images/albums/sierpien.jpeg'),
-  'wrzesien': require('../assets/images/albums/wrzesien.jpeg'),
-  'pazdziernik': require('../assets/images/albums/pazdziernik.jpeg'),
-  'listopad': require('../assets/images/albums/listopad.jpeg'),
-  'grudzien': require('../assets/images/albums/grudzien.jpeg'),
+  return (
+    <TouchableOpacity 
+      style={styles.albumItem}
+      onPress={() => navigation.navigate('SongList', { type: 'album', id: item.id, name: item.name, imageUrl: imageUrl })}
+    >
+      <ImageBackground source={imageSource} style={styles.itemImage} imageStyle={{ borderRadius: 15 }}>
+        <View style={styles.textOverlay} />
+        <Text style={styles.albumTitle}>{item.name}</Text>
+      </ImageBackground>
+    </TouchableOpacity>
+  );
 };
-
-const ALBUM_DATA = MONTH_ORDER.map(month => {
-  const fileKey = month.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('ł', 'l');
-  return {
-    id: month,
-    title: month.charAt(0).toUpperCase() + month.slice(1),
-    image: ALBUM_IMAGES[fileKey],
-  };
-});
-
-const AlbumItem = ({ title, image }: { title: string, image: any }) => (
-  <TouchableOpacity style={styles.albumItem}>
-    <ImageBackground source={image} style={styles.itemImage} imageStyle={{ borderRadius: 15 }}>
-      <View style={styles.textOverlay} />
-      <Text style={styles.albumTitle}>{title}</Text>
-    </ImageBackground>
-  </TouchableOpacity>
-);
 
 const AlbumsScreen = () => {
   const headerHeight = useHeaderHeight();
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAlbums = async () => {
+      try {
+        const fetchedAlbums = await getAlbums();
+        setAlbums(fetchedAlbums);
+      } catch (error) {
+        console.error("Failed to fetch albums:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAlbums();
+  }, []);
+
+  if (loading) {
+    return (
+      <GlobalBackground>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" />
+        </View>
+      </GlobalBackground>
+    );
+  }
 
   return (
     <GlobalBackground>
       <SafeAreaView style={styles.container}>
         <FlatList
-          data={ALBUM_DATA}
-          renderItem={({ item }) => <AlbumItem title={item.title} image={item.image} />}
+          data={albums}
+          renderItem={({ item }) => <AlbumItem item={item} />}
           keyExtractor={(item) => item.id}
-          numColumns={2} // Zmieniamy na dwie kolumny
+          numColumns={2}
           contentContainerStyle={[styles.listContent, { paddingTop: headerHeight }]}
         />
       </SafeAreaView>
@@ -66,29 +79,14 @@ const AlbumsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent', // Zmieniamy tło na przezroczyste
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10, // Dodajemy padding dla Androida
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 15,
+    backgroundColor: 'transparent',
   },
   listContent: {
-    paddingHorizontal: 15, // Większy padding dla 2 kolumn
+    paddingHorizontal: 15,
   },
   albumItem: {
     flex: 1,
-    margin: 8, // Większy margines
+    margin: 8,
     aspectRatio: 1,
   },
   itemImage: {
@@ -96,7 +94,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
-    padding: 15, // Większy padding wewnątrz
+    padding: 15,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.7)',
@@ -107,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   albumTitle: {
-    fontSize: 16, // Większa czcionka dla lepszej czytelności
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
@@ -116,4 +114,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AlbumsScreen; 
+export default AlbumsScreen;

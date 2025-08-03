@@ -15,7 +15,7 @@ export type HomeStackParamList = {
   Albums: undefined;
   Categories: undefined;
   Playlists: undefined;
-  SongList: { type: 'album' | 'category'; id: string };
+  SongList: { type: 'album' | 'category'; id: string; name:string; imageUrl: string | null };
   CreatePlaylist: undefined;
   PlaylistDetails: { playlistId: string; playlistName: string };
 };

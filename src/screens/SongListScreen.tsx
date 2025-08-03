@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
-import { searchSongs, Song } from '../services/api';
-import { SvgXml } from 'react-native-svg';
+import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, Platform, StatusBar, TouchableOpacity, Image } from 'react-native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { getSongsByAlbum, getSongsByCategory, Song } from '../services/api';
+import { HomeStackParamList } from '../navigation/HomeStackNavigator';
+import GlobalBackground from '../components/GlobalBackground';
+import { useHeaderHeight } from '@react-navigation/elements';
 
-// Ikona strzałki "wstecz"
-const backArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="black"/></svg>`;
+type SongListScreenRouteProp = RouteProp<HomeStackParamList, 'SongList'>;
 
-const SongListScreen = ({ navigation }: any) => {
+const SongListScreen = () => {
+  const route = useRoute<SongListScreenRouteProp>();
+  const navigation = useNavigation();
+  const { type, id, name, imageUrl } = route.params; 
+  const headerHeight = useHeaderHeight();
+
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +22,12 @@ const SongListScreen = ({ navigation }: any) => {
     const fetchSongs = async () => {
       try {
         setLoading(true);
-        const fetchedSongs = await searchSongs('');
+        let fetchedSongs: Song[] = [];
+        if (type === 'album') {
+          fetchedSongs = await getSongsByAlbum(id);
+        } else if (type === 'category') {
+          fetchedSongs = await getSongsByCategory(id);
+        }
         setSongs(fetchedSongs);
         setError(null);
       } catch (e: any) {
@@ -26,49 +38,67 @@ const SongListScreen = ({ navigation }: any) => {
     };
 
     fetchSongs();
-  }, []);
+  }, [id, type]);
+  
+  useEffect(() => {
+    navigation.setOptions({ title: name });
+  }, [name, navigation]);
+
 
   const renderSongItem = ({ item }: { item: Song }) => (
-    <View style={styles.songItem}>
-      <View style={styles.albumArtPlaceholder} />
+    <TouchableOpacity style={styles.songItem}>
+       <Image 
+        source={imageUrl ? { uri: imageUrl } : require('../assets/images/logo.png')}
+        style={styles.albumArt} 
+      />
       <View style={styles.songInfo}>
         <Text style={styles.songTitle}>{item.title}</Text>
         <Text style={styles.songArtist}>{item.artist}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
+  );
+
+  const ListHeader = () => (
+    <View style={{ height: headerHeight }} />
   );
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#6E44FF" />
-      </View>
+      <GlobalBackground>
+        <View style={[styles.container, styles.center]}>
+          <ActivityIndicator size="large" color="#6E44FF" />
+        </View>
+      </GlobalBackground>
     );
   }
 
   if (error) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={styles.errorText}>Błąd ładowania piosenek: {error}</Text>
-      </View>
+      <GlobalBackground>
+        <View style={[styles.container, styles.center]}>
+          <Text style={styles.errorText}>Błąd ładowania piosenek: {error}</Text>
+        </View>
+      </GlobalBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <SvgXml xml={backArrowIconXml} width="28" height="28" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Nowe utwory</Text>
-      </View>
-      <FlatList
-        data={songs}
-        renderItem={renderSongItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
-    </SafeAreaView>
+    <GlobalBackground>
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={songs}
+          renderItem={renderSongItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={ListHeader}
+          ListEmptyComponent={
+            <View style={[styles.center, { flex: 1 }]}>
+                <Text style={styles.errorText}>Brak piosenek w tej kolekcji.</Text>
+            </View>
+          }
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        />
+      </SafeAreaView>
+    </GlobalBackground>
   );
 };
 
@@ -81,41 +111,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 10, // Dodajemy padding dla Androida
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 15,
-  },
   errorText: {
-    color: 'red',
+    color: 'black',
     textAlign: 'center',
     margin: 20,
+    fontSize: 16
   },
   songItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: 'rgba(242, 242, 247, 0.8)',
     padding: 15,
     borderRadius: 15,
     marginVertical: 8,
     marginHorizontal: 20,
   },
-  albumArtPlaceholder: {
+  albumArt: {
     width: 50,
     height: 50,
     borderRadius: 10,
-    backgroundColor: '#E0E0E0', // Placeholder for album art
     marginRight: 15,
+    backgroundColor: '#E0E0E0',
   },
   songInfo: {
     flex: 1,
@@ -131,4 +147,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SongListScreen; 
+export default SongListScreen;

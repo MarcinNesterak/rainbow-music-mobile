@@ -48,5 +48,4 @@ const MainTabNavigator = () => {
     </Tab.Navigator>
   );
 }
-
 export default MainTabNavigator; 
