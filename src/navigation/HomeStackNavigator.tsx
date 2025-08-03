@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import SongListScreen from '../screens/SongListScreen';
-import LibraryScreen from '../screens/LibraryScreen';
+
 import AlbumsScreen from '../screens/AlbumsScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
 import CreatePlaylistScreen from '../screens/CreatePlaylistScreen';
@@ -15,7 +15,7 @@ export type HomeStackParamList = {
   Albums: undefined;
   Categories: undefined;
   Playlists: undefined;
-  SongList: { type: 'album' | 'category'; id: string; name:string; imageUrl: string | null };
+  SongList: { type: 'album' | 'category' | 'all'; id?: string; name:string; imageUrl?: string | null };
   CreatePlaylist: undefined;
   PlaylistDetails: { playlistId: string; playlistName: string };
 };

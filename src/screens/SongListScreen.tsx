@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, Platform, StatusBar, TouchableOpacity, Image } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
-import { getSongsByAlbum, getSongsByCategory, Song } from '../services/api';
+import { getAllSongs, getSongsByAlbum, getSongsByCategory, Song } from '../services/api';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import GlobalBackground from '../components/GlobalBackground';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -23,9 +23,11 @@ const SongListScreen = () => {
       try {
         setLoading(true);
         let fetchedSongs: Song[] = [];
-        if (type === 'album') {
+        if (type === 'all') {
+            fetchedSongs = await getAllSongs();
+        } else if (type === 'album' && id) {
           fetchedSongs = await getSongsByAlbum(id);
-        } else if (type === 'category') {
+        } else if (type === 'category' && id) {
           fetchedSongs = await getSongsByCategory(id);
         }
         setSongs(fetchedSongs);
@@ -47,10 +49,12 @@ const SongListScreen = () => {
 
   const renderSongItem = ({ item }: { item: Song }) => (
     <TouchableOpacity style={styles.songItem}>
-       <Image 
-        source={imageUrl ? { uri: imageUrl } : require('../assets/images/logo.png')}
-        style={styles.albumArt} 
-      />
+      {(type === 'album' || type === 'category') && (
+         <Image 
+          source={imageUrl ? { uri: imageUrl } : require('../assets/images/logo.png')}
+          style={styles.albumArt} 
+        />
+      )}
       <View style={styles.songInfo}>
         <Text style={styles.songTitle}>{item.title}</Text>
         <Text style={styles.songArtist}>{item.artist}</Text>

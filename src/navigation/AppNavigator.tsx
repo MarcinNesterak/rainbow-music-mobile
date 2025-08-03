@@ -8,6 +8,7 @@ import CustomTabBar from '../components/CustomTabBar';
 
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
+  Biblioteka: undefined;
   Playlisty: undefined;
   Ulubione: undefined;
   Profil: undefined;
@@ -28,14 +29,22 @@ const MainTabNavigator = () => {
         component={HomeStackNavigator} 
         options={{ title: 'Start' }} 
       />
-      {/* 
-        Ta zakładka jest teraz "wirtualna". 
-        Nawigacja do niej jest obsługiwana przez CustomTabBar,
-        który przenosi do ekranu Playlists wewnątrz HomeStackNavigator.
-      */}
+      <Tab.Screen 
+        name="Biblioteka" 
+        component={PlaceholderScreen}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('Home', { 
+              screen: 'SongList', 
+              params: { type: 'all', name: 'Biblioteka' } 
+            });
+          },
+        })}
+      />
       <Tab.Screen 
         name="Playlisty" 
-        component={PlaceholderScreen} // Komponent nie ma znaczenia, bo nawigacja jest przechwytywana
+        component={PlaceholderScreen}
         listeners={({ navigation }) => ({
           tabPress: (e) => {
             e.preventDefault();

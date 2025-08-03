@@ -51,6 +51,19 @@ export const searchSongs = async (query: string): Promise<Song[]> => {
   return data || [];
 };
 
+/**
+ * Pobiera wszystkie piosenki z bazy, sortując je alfabetycznie.
+ */
+export const getAllSongs = async (): Promise<Song[]> => {
+  const { data, error } = await supabase
+    .from('songs')
+    .select('*')
+    .order('title', { ascending: true });
+  if (error) throw new Error(error.message);
+  return data || [];
+};
+
+
 // --- OPERACJE NA ALBUMACH (ALBUMS) ---
 
 /**
