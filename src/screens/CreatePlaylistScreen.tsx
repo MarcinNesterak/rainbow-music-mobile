@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useAuth } from '../context/AuthContext';
 import { createPlaylist } from '../services/api';
+import GlobalBackground from '../components/GlobalBackground';
 
 const a_playlist_background_colors = [
   '#FFC107', '#FF5722', '#E91E63', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A'
@@ -43,31 +44,44 @@ const CreatePlaylistScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Stwórz nową playlistę</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Np. Wieczorne przeboje"
-        value={name}
-        onChangeText={setName}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Zapisz playlistę</Text>}
-      </TouchableOpacity>
-    </View>
+    <GlobalBackground>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.title}>Stwórz nową playlistę</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Np. Wieczorne przeboje"
+            value={name}
+            onChangeText={setName}
+            placeholderTextColor="#8E8E93"
+          />
+          <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Zapisz playlistę</Text>}
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </GlobalBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     width: '100%',

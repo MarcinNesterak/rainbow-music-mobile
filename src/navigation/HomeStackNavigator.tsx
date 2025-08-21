@@ -39,7 +39,7 @@ const HomeStackNavigator = () => {
       <Stack.Screen name="Albums" component={AlbumsScreen} options={{ title: 'Wszystkie albumy' }} />
       <Stack.Screen name="Categories" component={CategoriesScreen} options={{ title: 'Wszystkie kategorie' }} />
       <Stack.Screen name="Playlists" component={PlaylistsScreen} options={{ title: 'Moje playlisty' }} />
-      <Stack.Screen name="CreatePlaylist" component={CreatePlaylistScreen} options={{ title: 'Nowa playlista', headerTransparent: false, headerStyle: { backgroundColor: 'white' } }} />
+      <Stack.Screen name="CreatePlaylist" component={CreatePlaylistScreen} options={{ title: 'Nowa playlista' }} />
       <Stack.Screen name="PlaylistDetails" component={PlaylistDetailsScreen} options={({ route }) => ({ title: route.params.playlistName })} />
       <Stack.Screen name="SongList" component={SongListScreen} />
       <Stack.Screen 
