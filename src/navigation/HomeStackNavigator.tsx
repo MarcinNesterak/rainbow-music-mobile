@@ -9,6 +9,7 @@ import CategoriesScreen from '../screens/CategoriesScreen';
 import CreatePlaylistScreen from '../screens/CreatePlaylistScreen';
 import PlaylistDetailsScreen from '../screens/PlaylistDetailsScreen';
 import PlaylistsScreen from '../screens/PlaylistsScreen';
+import AddToPlaylistScreen from '../screens/AddToPlaylistScreen';
 
 export type HomeStackParamList = {
   HomeDashboard: undefined;
@@ -18,6 +19,7 @@ export type HomeStackParamList = {
   SongList: { type: 'album' | 'category' | 'all'; id?: string; name:string; imageUrl?: string | null };
   CreatePlaylist: undefined;
   PlaylistDetails: { playlistId: string; playlistName: string };
+  AddToPlaylist: { songId: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -40,6 +42,16 @@ const HomeStackNavigator = () => {
       <Stack.Screen name="CreatePlaylist" component={CreatePlaylistScreen} options={{ title: 'Nowa playlista', headerTransparent: false, headerStyle: { backgroundColor: 'white' } }} />
       <Stack.Screen name="PlaylistDetails" component={PlaylistDetailsScreen} options={({ route }) => ({ title: route.params.playlistName })} />
       <Stack.Screen name="SongList" component={SongListScreen} />
+      <Stack.Screen 
+        name="AddToPlaylist" 
+        component={AddToPlaylistScreen} 
+        options={{ 
+          title: 'Dodaj do playlisty', 
+          headerTransparent: false, 
+          headerStyle: { backgroundColor: 'white' },
+          presentation: 'modal', // Ekran wysunie się od dołu
+        }} 
+      />
     </Stack.Navigator>
   );
 };

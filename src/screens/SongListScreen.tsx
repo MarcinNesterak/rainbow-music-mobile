@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, FlatList, SafeAreaView, Platform, StatusBar, TouchableOpacity, Image } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SvgXml } from 'react-native-svg';
+import Modal from 'react-native-modal';
 import { getAllSongs, getSongsByAlbum, getSongsByCategory, Song } from '../services/api';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import GlobalBackground from '../components/GlobalBackground';
@@ -10,12 +12,13 @@ import { useFavorites } from '../context/FavoritesContext';
 
 const heartIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
 const heartOutlineIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>`;
+const moreIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`;
 
 type SongListScreenRouteProp = RouteProp<HomeStackParamList, 'SongList'>;
 
 const SongListScreen = () => {
   const route = useRoute<SongListScreenRouteProp>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const { type, id, name, imageUrl } = route.params; 
   const headerHeight = useHeaderHeight();
 
@@ -23,6 +26,20 @@ const SongListScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  
+  // Modal-related state
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+
+  const openSongMenu = (song: Song) => {
+    setSelectedSong(song);
+    setModalVisible(true);
+  };
+
+  const closeSongMenu = () => {
+    setModalVisible(false);
+    setSelectedSong(null);
+  };
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -76,14 +93,16 @@ const SongListScreen = () => {
           <Text style={styles.songTitle}>{item.title}</Text>
           <Text style={styles.songArtist}>{item.artist}</Text>
         </View>
-        <TouchableOpacity onPress={toggleFavorite}>
+        <TouchableOpacity onPress={toggleFavorite} style={styles.iconButton}>
           <SvgXml 
             xml={isSongFavorite ? heartIconXml : heartOutlineIconXml} 
             width={26} 
             height={26} 
             fill={isSongFavorite ? '#6E44FF' : 'gray'} 
-            style={styles.heartIcon} 
           />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => openSongMenu(item)} style={styles.iconButton}>
+            <SvgXml xml={moreIconXml} width={26} height={26} fill="gray" />
         </TouchableOpacity>
       </TouchableOpacity>
     );
@@ -129,6 +148,30 @@ const SongListScreen = () => {
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
         />
       </SafeAreaView>
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={closeSongMenu}
+        onSwipeComplete={closeSongMenu}
+        swipeDirection={['down']}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedSong?.title}</Text>
+          <Text style={styles.modalArtist}>{selectedSong?.artist}</Text>
+          <View style={styles.separator} />
+          <TouchableOpacity 
+            style={styles.modalButton}
+            onPress={() => {
+              if (selectedSong) {
+                navigation.navigate('AddToPlaylist', { songId: selectedSong.id });
+                closeSongMenu();
+              }
+            }}
+          >
+            <Text style={styles.modalButtonText}>Dodaj do playlisty</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </GlobalBackground>
   );
 };
@@ -176,9 +219,45 @@ const styles = StyleSheet.create({
     color: 'gray',
     marginTop: 2,
   },
-  heartIcon: {
-    marginLeft: 15,
-  }
+  iconButton: {
+    padding: 5,
+    marginLeft: 10,
+  },
+  // Modal Styles
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 22,
+    borderTopLeftRadius: 17,
+    borderTopRightRadius: 17,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalArtist: {
+    fontSize: 16,
+    color: 'gray',
+    marginBottom: 20,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 20,
+  },
+  modalButton: {
+    padding: 15,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
 });
 
 export default SongListScreen;

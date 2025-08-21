@@ -181,6 +181,19 @@ export const getSongsByPlaylist = async (playlistId: string): Promise<Song[]> =>
     return data?.map(item => item.songs as unknown as Song).filter(Boolean) || [];
 };
 
+/**
+ * Usuwa piosenkę z playlisty.
+ */
+export const removeSongFromPlaylist = async (playlistId: string, songId: string) => {
+    const { error } = await supabase
+        .from('playlist_songs')
+        .delete()
+        .eq('playlist_id', playlistId)
+        .eq('song_id', songId);
+    
+    if (error) throw new Error(error.message);
+};
+
 // --- OPERACJE NA ULUBIONYCH (FAVORITES) ---
 
 /**
