@@ -16,8 +16,6 @@ const AlbumItem = ({ item }: AlbumItemProps) => {
     ? supabase.storage.from('album-art').getPublicUrl(item.cover_image_path).data.publicUrl
     : null;
 
-  console.log('Attempting to load image for:', item.name, 'URL:', imageUrl);
-
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/images/logo.png');

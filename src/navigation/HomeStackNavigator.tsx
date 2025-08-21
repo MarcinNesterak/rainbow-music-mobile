@@ -11,7 +11,7 @@ import PlaylistDetailsScreen from '../screens/PlaylistDetailsScreen';
 import PlaylistsScreen from '../screens/PlaylistsScreen';
 
 export type HomeStackParamList = {
-  Home: undefined;
+  HomeDashboard: undefined;
   Albums: undefined;
   Categories: undefined;
   Playlists: undefined;
@@ -33,7 +33,7 @@ const HomeStackNavigator = () => {
         },
         headerTintColor: '#000000', // Ustawia kolor strzałki powrotnej
       }}>
-      <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="HomeDashboard" component={HomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Albums" component={AlbumsScreen} options={{ title: 'Wszystkie albumy' }} />
       <Stack.Screen name="Categories" component={CategoriesScreen} options={{ title: 'Wszystkie kategorie' }} />
       <Stack.Screen name="Playlists" component={PlaylistsScreen} options={{ title: 'Moje playlisty' }} />

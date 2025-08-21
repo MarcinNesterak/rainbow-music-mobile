@@ -15,6 +15,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import MainTabNavigator from './src/navigation/AppNavigator';
 import GlobalBackground from './src/components/GlobalBackground';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { FavoritesProvider } from './src/context/FavoritesContext';
 
 const linking = {
   prefixes: ['com.rainbowmusicmobile://'],
@@ -85,7 +86,9 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <FavoritesProvider>
+        <AppContent />
+      </FavoritesProvider>
     </AuthProvider>
   );
 }
