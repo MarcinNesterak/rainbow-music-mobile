@@ -10,51 +10,62 @@ import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import MainTabNavigator from './src/navigation/AppNavigator';
 import GlobalBackground from './src/components/GlobalBackground';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
-import { PlayerProvider } from './src/context/PlayerContext';
+import { PlayerProvider, usePlayer } from './src/context/PlayerContext';
+import FullScreenPlayer from './src/screens/FullScreenPlayer';
+import MiniPlayer from './src/components/MiniPlayer';
 
 const linking = {
-  prefixes: ['com.rainbowmusicmobile://'],
+  prefixes: ['yourapp://'],
   config: {
     screens: {
       Login: 'login',
+      Register: 'register',
+      MainApp: {
+        screens: {
+          Home: {
+            screens: {
+              Home: 'home',
+              SongList: 'songlist',
+            },
+          },
+        },
+      },
     },
   },
 };
 
-// Definiujemy nasz własny motyw, aby tło nawigacji było przezroczyste
 const TransparentTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
     background: 'transparent',
-    card: 'transparent',
   },
 };
 
-// Definiujemy typy dla wszystkich ekranów w aplikacji
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   MainApp: undefined;
-  // Usunięto resztę, bo są w HomeStackNavigator
+  // FullScreenPlayer nie jest już ekranem nawigacji
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppContent = () => {
   const { session, loading } = useAuth();
-
+  
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#6E44FF" />
-      </View>
+       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+         <ActivityIndicator size="large" color="#6E44FF" />
+       </View>
     );
   }
 
@@ -69,9 +80,7 @@ const AppContent = () => {
           initialRouteName={session && session.user ? "MainApp" : "Login"}
         >
           {session && session.user ? (
-            <>
-              <Stack.Screen name="MainApp" component={MainTabNavigator} />
-            </>
+            <Stack.Screen name="MainApp" component={MainTabNavigator} />
           ) : (
             <>
               <Stack.Screen name="Login" component={LoginScreen} />
@@ -80,18 +89,22 @@ const AppContent = () => {
           )}
         </Stack.Navigator>
       </NavigationContainer>
+      <MiniPlayer />
+      <FullScreenPlayer />
     </GlobalBackground>
   );
 };
 
 export default function App() {
   return (
-    <AuthProvider>
-      <FavoritesProvider>
-        <PlayerProvider>
-          <AppContent />
-        </PlayerProvider>
-      </FavoritesProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <FavoritesProvider>
+          <PlayerProvider>
+            <AppContent />
+          </PlayerProvider>
+        </FavoritesProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

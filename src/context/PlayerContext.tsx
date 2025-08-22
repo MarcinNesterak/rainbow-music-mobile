@@ -9,22 +9,34 @@ Sound.setCategory('Playback');
 interface PlayerContextType {
   isPlaying: boolean;
   currentTrack: Song | null;
+  isLoading: boolean;
+  isPlayerVisible: boolean;
   playSong: (song: Song) => void;
   pauseSong: () => void;
-  isLoading: boolean;
+  resumeSong: () => void;
+  showPlayer: () => void;
+  hidePlayer: () => void;
+  stopSong: () => void; // <-- Dodajemy nową funkcję
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 // Tworzymy "globalną" instancję dźwięku, aby nie tworzyć nowej dla każdej piosenki
 let soundInstance: Sound | null = null;
+let progressInterval: NodeJS.Timeout | null = null; // Dodajemy to dla przyszłego paska postępu
 
 export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<Song | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0); // Dodajemy dla przyszłego paska postępu
+  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
 
   const cleanup = () => {
+    if (progressInterval) {
+      clearInterval(progressInterval);
+      progressInterval = null;
+    }
     if (soundInstance) {
       soundInstance.release();
       soundInstance = null;
@@ -32,7 +44,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying(false);
     setCurrentTrack(null);
     setIsLoading(false);
+    setProgress(0);
+    // isPlayerVisible jest resetowane przez funkcje, które wołają cleanup
   };
+
+  const stopSong = useCallback(() => {
+    cleanup();
+    hidePlayer(); // Używamy hidePlayer, żeby spójnie zarządzać widocznością
+  }, []);
 
   const playSong = useCallback(async (song: Song) => {
     cleanup(); // Zawsze czyścimy przed odtworzeniem nowej piosenki
@@ -47,7 +66,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     // Krok 1: Wygeneruj bezpieczny, tymczasowy URL
     const { data, error: urlError } = await supabase.storage
-      .from('songs') // Nazwa Twojego wiadra (bucket)
+      .from('song-audio') // POPRAWIONA NAZWA WIADRA
       .createSignedUrl(song.audio_file_path, 60 * 5); // Ważny przez 5 minut
 
     if (urlError || !data?.signedUrl) {
@@ -67,14 +86,21 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
 
       soundInstance = newSoundInstance;
+      
+      progressInterval = setInterval(() => {
+        soundInstance?.getCurrentTime((seconds) => {
+          const duration = soundInstance?.getDuration() ?? 1;
+          setProgress(seconds / duration);
+        });
+      }, 250);
+
       soundInstance.play((success) => {
         if (success) {
           console.log('Piosenka odtworzona pomyślnie');
         } else {
           console.log('Błąd odtwarzania');
         }
-        // Po zakończeniu odtwarzania
-        cleanup();
+        stopSong(); // Zatrzymaj i zamknij, gdy piosenka się skończy
       });
       setIsPlaying(true);
       setIsLoading(false);
@@ -88,6 +114,26 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const resumeSong = useCallback(() => {
+    if (soundInstance) {
+      soundInstance.play((success) => {
+        if (!success) {
+          console.log('Błąd odtwarzania po wznowieniu');
+          stopSong(); // Zatrzymaj i zamknij w razie błędu
+        }
+      });
+      setIsPlaying(true);
+    }
+  }, []);
+
+  const showPlayer = () => {
+    setIsPlayerVisible(true);
+  };
+
+  const hidePlayer = () => {
+    setIsPlayerVisible(false);
+  };
+
   // Upewniamy się, że dźwięk jest czyszczony przy zamykaniu aplikacji
   useEffect(() => {
     return () => {
@@ -98,9 +144,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     isPlaying,
     currentTrack,
+    isLoading,
+    isPlayerVisible,
     playSong,
     pauseSong,
-    isLoading,
+    resumeSong,
+    showPlayer,
+    hidePlayer,
+    stopSong, // <-- Upubliczniamy funkcję
   };
 
   return (
