@@ -33,7 +33,7 @@ const FullScreenPlayer = () => {
     >
       <View style={styles.modalContainer}>
         <TouchableOpacity style={styles.backdrop} onPress={hidePlayer} activeOpacity={1} />
-        <View style={[styles.playerSheet, { paddingBottom: insets.bottom + TAB_BAR_ESTIMATED_HEIGHT }]}>
+        <View style={styles.playerSheet}>
           <GlobalBackground>
             <SafeAreaView style={styles.container}>
               {currentTrack ? (

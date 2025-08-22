@@ -10,6 +10,7 @@ const pauseIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 const MiniPlayer = () => {
   const { isPlaying, currentTrack, isLoading, isPlayerVisible, pauseSong, resumeSong, showPlayer } = usePlayer();
   const insets = useSafeAreaInsets();
+  const TAB_BAR_HEIGHT = 65; // Przybliżona wysokość paska nawigacji + mały margines
 
   if (!currentTrack || isPlayerVisible) {
     return null;
@@ -25,7 +26,7 @@ const MiniPlayer = () => {
 
   return (
     <TouchableOpacity 
-      style={[styles.container, { bottom: insets.bottom > 0 ? insets.bottom : 10 }]}
+      style={[styles.container, { bottom: insets.bottom + TAB_BAR_HEIGHT }]}
       onPress={showPlayer}
       activeOpacity={0.9}
     >
