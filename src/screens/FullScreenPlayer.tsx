@@ -31,7 +31,8 @@ const FullScreenPlayer = () => {
     stopSong,
     progress,
     duration,
-    currentTime
+    currentTime,
+    placeholderColor, // <-- Pobieramy kolor
   } = usePlayer();
   const insets = useSafeAreaInsets();
   
@@ -82,7 +83,7 @@ const FullScreenPlayer = () => {
                       {currentTrackArtUrl ?
                         <Image source={{ uri: currentTrackArtUrl }} style={styles.artworkImage} />
                         :
-                        <View style={styles.artworkImage} />
+                        <View style={[styles.artworkImage, { backgroundColor: placeholderColor || 'rgba(255, 255, 255, 0.2)' }]} />
                       }
                   </View>
                   

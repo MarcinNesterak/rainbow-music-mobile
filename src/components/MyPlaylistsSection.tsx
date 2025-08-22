@@ -48,7 +48,12 @@ const PlaylistTile = ({ item }: { item: Playlist }) => {
   return (
     <TouchableOpacity 
       style={[styles.item, { backgroundColor }]}
-      onPress={() => navigation.navigate('PlaylistDetails', { playlistId: item.id, playlistName: item.name })}
+      onPress={() => navigation.navigate('PlaylistDetails', { 
+        playlistId: item.id, 
+        playlistName: item.name,
+        coverColor: backgroundColor, // <-- Dodajemy kolor
+        imageUrl: null // Na razie brak obrazka dla playlist
+      })}
     >
       <Text style={styles.playlistTitle}>{item.name}</Text>
     </TouchableOpacity>

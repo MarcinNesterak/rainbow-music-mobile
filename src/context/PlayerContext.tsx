@@ -10,12 +10,13 @@ interface PlayerContextType {
   isPlaying: boolean;
   currentTrack: Song | null;
   currentTrackArtUrl: string | null; // <-- Nowy stan na URL grafiki
+  placeholderColor: string | null; // <-- Nowy stan na kolor
   isLoading: boolean;
   isPlayerVisible: boolean;
   progress: number; // Postęp jako wartość 0-1
   duration: number; // Czas trwania w sekundach
   currentTime: number; // Aktualny czas w sekundach
-  playSong: (song: Song, imageUrl?: string | null) => void; // <-- Zmieniona funkcja
+  playSong: (song: Song, imageUrl?: string | null, color?: string) => void; // <-- Zmieniona funkcja
   pauseSong: () => void;
   resumeSong: () => void;
   showPlayer: () => void;
@@ -33,6 +34,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<Song | null>(null);
   const [currentTrackArtUrl, setCurrentTrackArtUrl] = useState<string | null>(null); // <-- Nowy stan
+  const [placeholderColor, setPlaceholderColor] = useState<string | null>(null); // <-- Nowy stan
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -51,6 +53,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying(false);
     setCurrentTrack(null);
     setCurrentTrackArtUrl(null); // <-- Resetuj grafikę
+    setPlaceholderColor(null); // <-- Resetuj kolor
     setIsLoading(false);
     setProgress(0);
     setDuration(0);
@@ -63,7 +66,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     hidePlayer(); // Używamy hidePlayer, żeby spójnie zarządzać widocznością
   }, []);
 
-  const playSong = useCallback(async (song: Song, imageUrl?: string | null) => {
+  const playSong = useCallback(async (song: Song, imageUrl?: string | null, color?: string) => {
     cleanup(); // Zawsze czyścimy przed odtworzeniem nowej piosenki
 
     if (!song.audio_file_path) {
@@ -74,6 +77,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     setCurrentTrack(song);
     setCurrentTrackArtUrl(imageUrl || null); // <-- Ustaw grafikę
+    setPlaceholderColor(color || null); // <-- Ustaw kolor
 
     // Krok 1: Wygeneruj bezpieczny, tymczasowy URL
     const { data, error: urlError } = await supabase.storage
@@ -160,6 +164,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     isPlaying,
     currentTrack,
     currentTrackArtUrl, // <-- Upublicznij
+    placeholderColor, // <-- Upublicznij
     isLoading,
     isPlayerVisible,
     progress, // <-- Upublicznij

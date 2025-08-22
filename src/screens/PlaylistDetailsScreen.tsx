@@ -7,6 +7,7 @@ import GlobalBackground from '../components/GlobalBackground';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Modal from 'react-native-modal';
 import { SvgXml } from 'react-native-svg';
+import { usePlayer } from '../context/PlayerContext'; // <-- Import
 
 const moreIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`;
 
@@ -15,9 +16,10 @@ type PlaylistDetailsScreenRouteProp = RouteProp<HomeStackParamList, 'PlaylistDet
 const PlaylistDetailsScreen = () => {
   const route = useRoute<PlaylistDetailsScreenRouteProp>();
   const headerHeight = useHeaderHeight();
-  const { playlistId } = route.params;
+  const { playlistId, imageUrl, coverColor } = route.params; // <-- Pobieramy coverColor
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
+  const { playSong, showPlayer } = usePlayer(); // <-- Pobieramy funkcje
 
   // Modal-related state
   const [isModalVisible, setModalVisible] = useState(false);
@@ -51,6 +53,11 @@ const PlaylistDetailsScreen = () => {
     }, [fetchSongs])
   );
 
+  const handleSongPress = (song: Song) => {
+    playSong(song, imageUrl, coverColor); // <-- Przekazujemy coverColor
+    showPlayer();
+  };
+
   const handleRemoveSong = (songToRemove: Song) => {
     closeSongMenu(); // Zamknij menu od razu
     Alert.alert(
@@ -78,7 +85,7 @@ const PlaylistDetailsScreen = () => {
   };
 
   const renderSongItem = ({ item }: { item: Song }) => (
-    <View style={styles.songItem}>
+    <TouchableOpacity style={styles.songItem} onPress={() => handleSongPress(item)}>
       <View style={styles.songInfo}>
         <Text style={styles.songTitle}>{item.title}</Text>
         <Text style={styles.songArtist}>{item.artist}</Text>
@@ -86,7 +93,7 @@ const PlaylistDetailsScreen = () => {
       <TouchableOpacity onPress={() => openSongMenu(item)} style={styles.iconButton}>
         <SvgXml xml={moreIconXml} width={26} height={26} fill="gray" />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
