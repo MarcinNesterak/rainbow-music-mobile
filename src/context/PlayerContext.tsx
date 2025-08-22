@@ -9,14 +9,18 @@ Sound.setCategory('Playback');
 interface PlayerContextType {
   isPlaying: boolean;
   currentTrack: Song | null;
+  currentTrackArtUrl: string | null; // <-- Nowy stan na URL grafiki
   isLoading: boolean;
   isPlayerVisible: boolean;
-  playSong: (song: Song) => void;
+  progress: number; // Postęp jako wartość 0-1
+  duration: number; // Czas trwania w sekundach
+  currentTime: number; // Aktualny czas w sekundach
+  playSong: (song: Song, imageUrl?: string | null) => void; // <-- Zmieniona funkcja
   pauseSong: () => void;
   resumeSong: () => void;
   showPlayer: () => void;
   hidePlayer: () => void;
-  stopSong: () => void; // <-- Dodajemy nową funkcję
+  stopSong: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -28,8 +32,11 @@ let progressInterval: NodeJS.Timeout | null = null; // Dodajemy to dla przyszłe
 export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<Song | null>(null);
+  const [currentTrackArtUrl, setCurrentTrackArtUrl] = useState<string | null>(null); // <-- Nowy stan
   const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState(0); // Dodajemy dla przyszłego paska postępu
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
 
   const cleanup = () => {
@@ -43,8 +50,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
     setIsPlaying(false);
     setCurrentTrack(null);
+    setCurrentTrackArtUrl(null); // <-- Resetuj grafikę
     setIsLoading(false);
     setProgress(0);
+    setDuration(0);
+    setCurrentTime(0);
     // isPlayerVisible jest resetowane przez funkcje, które wołają cleanup
   };
 
@@ -53,7 +63,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     hidePlayer(); // Używamy hidePlayer, żeby spójnie zarządzać widocznością
   }, []);
 
-  const playSong = useCallback(async (song: Song) => {
+  const playSong = useCallback(async (song: Song, imageUrl?: string | null) => {
     cleanup(); // Zawsze czyścimy przed odtworzeniem nowej piosenki
 
     if (!song.audio_file_path) {
@@ -63,6 +73,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     
     setIsLoading(true);
     setCurrentTrack(song);
+    setCurrentTrackArtUrl(imageUrl || null); // <-- Ustaw grafikę
 
     // Krok 1: Wygeneruj bezpieczny, tymczasowy URL
     const { data, error: urlError } = await supabase.storage
@@ -86,11 +97,15 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
 
       soundInstance = newSoundInstance;
+      const songDuration = Math.round(soundInstance.getDuration());
+      setDuration(songDuration);
       
       progressInterval = setInterval(() => {
         soundInstance?.getCurrentTime((seconds) => {
-          const duration = soundInstance?.getDuration() ?? 1;
-          setProgress(seconds / duration);
+          setCurrentTime(seconds);
+          if (songDuration > 0) {
+            setProgress(seconds / songDuration);
+          }
         });
       }, 250);
 
@@ -144,8 +159,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     isPlaying,
     currentTrack,
+    currentTrackArtUrl, // <-- Upublicznij
     isLoading,
     isPlayerVisible,
+    progress, // <-- Upublicznij
+    duration, // <-- Upublicznij
+    currentTime, // <-- Upublicznij
     playSong,
     pauseSong,
     resumeSong,

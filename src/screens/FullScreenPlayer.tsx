@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, Modal, Image } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { usePlayer } from '../context/PlayerContext';
 import { SvgXml } from 'react-native-svg';
 import GlobalBackground from '../components/GlobalBackground';
@@ -10,8 +11,28 @@ const pauseIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 const downArrowIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="32px" height="32px"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>`;
 const closeIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="28px" height="28px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
 
+// Funkcja pomocnicza do formatowania czasu
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+};
+
 const FullScreenPlayer = () => {
-  const { isPlaying, currentTrack, isLoading, pauseSong, resumeSong, hidePlayer, isPlayerVisible, stopSong } = usePlayer();
+  const { 
+    isPlaying, 
+    currentTrack, 
+    currentTrackArtUrl,
+    isLoading, 
+    pauseSong, 
+    resumeSong, 
+    hidePlayer, 
+    isPlayerVisible, 
+    stopSong,
+    progress,
+    duration,
+    currentTime
+  } = usePlayer();
   const insets = useSafeAreaInsets();
   
   const TAB_BAR_ESTIMATED_HEIGHT = 60; // Wysokość z CustomTabBar
@@ -23,6 +44,10 @@ const FullScreenPlayer = () => {
       resumeSong();
     }
   };
+
+  const imageSource = currentTrackArtUrl
+    ? { uri: currentTrackArtUrl }
+    : require('../assets/images/logo.png');
 
   return (
     <Modal
@@ -54,7 +79,11 @@ const FullScreenPlayer = () => {
                   
                   {/* === OKŁADKA === */}
                   <View style={styles.artworkWrapper}>
-                      <View style={styles.artworkPlaceholder} />
+                      {currentTrackArtUrl ?
+                        <Image source={{ uri: currentTrackArtUrl }} style={styles.artworkImage} />
+                        :
+                        <View style={styles.artworkImage} />
+                      }
                   </View>
                   
                   {/* === INFO O PIOSENCE I KONTROLKI === */}
@@ -62,6 +91,24 @@ const FullScreenPlayer = () => {
                       <View style={styles.songInfo}>
                           <Text style={styles.title}>{currentTrack.title}</Text>
                           <Text style={styles.artist}>{currentTrack.artist}</Text>
+                      </View>
+                      
+                      {/* === PASEK POSTĘPU === */}
+                      <View style={styles.progressContainer}>
+                        <Slider
+                          style={styles.slider}
+                          value={progress}
+                          minimumValue={0}
+                          maximumValue={1}
+                          minimumTrackTintColor="#000000"
+                          maximumTrackTintColor="#C4C4C4"
+                          thumbTintColor="#000000"
+                          // onSlidingComplete={...} // Do dodania w przyszłości
+                        />
+                        <View style={styles.timeContainer}>
+                          <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+                          <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                        </View>
                       </View>
 
                       <View style={styles.controls}>
@@ -142,22 +189,41 @@ const styles = StyleSheet.create({
         flex: 3,
         alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: 20,
     },
-    artworkPlaceholder: {
-        width: '90%',
+    artworkImage: {
+        width: '100%',
         aspectRatio: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderRadius: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Jaśniejszy placeholder
     },
     // Dolna sekcja
     bottomContainer: {
         flex: 2,
         paddingHorizontal: 20,
         alignItems: 'center',
+        justifyContent: 'space-around', // Lepsze rozmieszczenie
     },
     songInfo: {
         alignItems: 'center',
-        marginBottom: 20,
+    },
+    progressContainer: {
+      width: '100%',
+      marginTop: 10,
+    },
+    slider: {
+      width: '100%',
+      height: 40,
+    },
+    timeContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      marginTop: -10,
+    },
+    timeText: {
+      color: '#333',
+      fontSize: 12,
     },
     title: {
         color: 'black',
@@ -171,7 +237,7 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     controls: {
-        marginTop: 20,
+        marginTop: 10,
     },
 });
 

@@ -44,7 +44,7 @@ const SongListScreen = () => {
   };
 
   const handleSongPress = (song: Song) => {
-    playSong(song);
+    playSong(song, imageUrl); // <-- Przekazujemy imageUrl
     showPlayer();
   };
 
