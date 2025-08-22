@@ -11,6 +11,7 @@ export interface Song {
   instrumental_file_path: string | null;
   lyrics_timed: any | null;
   duration_seconds: number | null;
+  store_url?: string; // Link do sklepu z piosenką
 }
 
 export interface Album {
