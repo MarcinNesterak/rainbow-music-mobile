@@ -28,6 +28,8 @@ interface PlayerContextType {
   stopSong: () => void;
   seekTo: (position: number) => void; // <-- Nowa funkcja do przewijania
   switchVersion: (version: VersionType) => void;
+  showLyrics: boolean; // <-- Dodajemy stan do kontekstu
+  setShowLyrics: (show: boolean) => void; // <-- Dodajemy funkcję do zmiany stanu
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -47,6 +49,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<VersionType>('vocal');
+  const [showLyrics, setShowLyrics] = useState(false); // <-- Stan jest teraz tutaj
 
   const cleanup = () => {
     if (progressInterval) {
@@ -73,6 +76,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     color?: string | null
   ) => {
     cleanup(); // Czyścimy poprzedni dźwięk i interwał
+    setShowLyrics(false); // <-- Resetujemy stan przy odtwarzaniu
 
     setIsLoading(true);
     setCurrentTrack(song);
@@ -218,6 +222,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     stopSong, // <-- Upubliczniamy funkcję
     seekTo, // <-- Upublicznij funkcję
     switchVersion,
+    showLyrics,
+    setShowLyrics,
   };
 
   return (

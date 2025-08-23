@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { SvgXml } from 'react-native-svg';
 import GlobalBackground from '../components/GlobalBackground';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import KaraokeView from '../components/KaraokeView'; // <-- 1. Import
 
 const playIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="64px" height="64px"><path d="M8 5v14l11-7z"/></svg>`;
 const pauseIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="64px" height="64px"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
@@ -56,10 +57,12 @@ const FullScreenPlayer = () => {
     seekTo, // <-- 1. Pobieramy funkcję seekTo
     currentVersion,
     switchVersion,
+    showLyrics,
+    setShowLyrics,
   } = usePlayer();
   const insets = useSafeAreaInsets();
   const [isStoreModalVisible, setStoreModalVisible] = useState(false);
-
+  
   const TAB_BAR_ESTIMATED_HEIGHT = 60; // Wysokość z CustomTabBar
 
   const handlePlayPause = () => {
@@ -81,6 +84,18 @@ const FullScreenPlayer = () => {
       setStoreModalVisible(true);
     } else {
       Alert.alert('Brak linku', 'Dla tej piosenki nie zdefiniowano linku do sklepu.');
+    }
+  };
+
+  const handleLyricsPress = () => {
+    if (isPremium) {
+      if (currentTrack?.lyrics_timed) {
+        setShowLyrics(!showLyrics); // Używamy funkcji z kontekstu
+      } else {
+        Alert.alert('Brak tekstu', 'Dla tej piosenki nie przygotowano jeszcze tekstu.');
+      }
+    } else {
+      Alert.alert('Funkcja Premium', 'Teksty piosenek są dostępne tylko w subskrypcji Premium.');
     }
   };
 
@@ -126,23 +141,16 @@ const FullScreenPlayer = () => {
                     </TouchableOpacity>
                   </View>
 
-                  {/* === OKŁADKA === */}
+                  {/* === OKŁADKA LUB TEKST === */}
                   <View style={styles.artworkWrapper}>
-                    {currentTrackArtUrl ? (
-                      <Image
-                        source={{ uri: currentTrackArtUrl }}
-                        style={styles.artworkImage}
-                      />
+                    {showLyrics ? (
+                      <KaraokeView />
                     ) : (
-                      <View
-                        style={[
-                          styles.artworkImage,
-                          {
-                            backgroundColor:
-                              placeholderColor || 'rgba(255, 255, 255, 0.2)',
-                          },
-                        ]}
-                      />
+                      currentTrackArtUrl ? (
+                        <Image source={{ uri: currentTrackArtUrl }} style={styles.artworkImage} />
+                      ) : (
+                        <View style={[styles.artworkImage, { backgroundColor: placeholderColor || 'rgba(255, 255, 255, 0.2)' }]} />
+                      )
                     )}
                   </View>
 
@@ -200,7 +208,7 @@ const FullScreenPlayer = () => {
                         </TouchableOpacity>
                       )}
 
-                      <TouchableOpacity style={styles.featureButton} onPress={() => Alert.alert('Wkrótce!', 'Teksty piosenek będą dostępne w przyszłości.')}>
+                      <TouchableOpacity style={styles.featureButton} onPress={handleLyricsPress}>
                         <SvgXml xml={lyricsIconXml} />
                         <Text style={styles.featureText}>Tekst</Text>
                         {!isPremium && <View style={styles.lockIconContainer}><SvgXml xml={lockIconXml} /></View>}
