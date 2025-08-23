@@ -1,49 +1,80 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
+import { Profile } from '../services/api'; // Importujemy typ Profile
 
 interface AuthContextType {
   session: Session | null;
-  user: User | null;
   loading: boolean;
+  profile: Profile | null; // <-- Dodajemy profil użytkownika
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null); // <-- Stan dla profilu
 
   useEffect(() => {
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const fetchSessionAndProfile = async () => {
+      setLoading(true);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Błąd pobierania sesji:", sessionError.message);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
-      setUser(session?.user ?? null);
+
+      if (session) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (error) {
+            throw error;
+          }
+          setProfile(data);
+        } catch (error: any) {
+          console.error("Błąd pobierania profilu:", error.message);
+        }
+      } else {
+        setProfile(null);
+      }
+      
       setLoading(false);
     };
 
-    getInitialSession();
+    fetchSessionAndProfile();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      // Pobieramy profil ponownie przy zmianie stanu autentykacji
+      if (session) {
+        fetchSessionAndProfile();
+      } else {
+        setProfile(null);
       }
-    );
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  const value = {
-    session,
-    user,
-    loading,
-  };
+  const value = { session, loading, profile }; // <-- Upubliczniamy profil
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
