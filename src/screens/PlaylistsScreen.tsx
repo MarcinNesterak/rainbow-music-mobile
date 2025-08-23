@@ -50,16 +50,18 @@ const PlaylistItem = ({ item, onDelete }: { item: Playlist, onDelete: () => void
 };
 
 const PlaylistsScreen = () => {
-  const { user } = useAuth();
+  const { session } = useAuth(); // Zmieniamy user na session
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const headerHeight = useHeaderHeight();
   
   const fetchPlaylists = useCallback(async () => {
-    if (user) {
-      const userPlaylists = await getUserPlaylists(user.id);
+    if (session?.user) { // Sprawdzamy, czy istnieje sesja i użytkownik
+      const userPlaylists = await getUserPlaylists(session.user.id);
       setPlaylists(userPlaylists);
+    } else {
+      setPlaylists([]); // Czyścimy, jeśli nie ma sesji
     }
-  }, [user]);
+  }, [session]); // Zależność od sesji
 
   useFocusEffect(
     useCallback(() => {

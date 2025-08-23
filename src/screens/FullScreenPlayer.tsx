@@ -151,6 +151,9 @@ const FullScreenPlayer = () => {
                     <View style={styles.songInfo}>
                       <Text style={styles.title}>{currentTrack.title}</Text>
                       <Text style={styles.artist}>{currentTrack.artist}</Text>
+                      <Text style={styles.versionText}>
+                        {currentVersion === 'vocal' ? 'Wokal' : 'Instrumental'}
+                      </Text>
                     </View>
 
                     {/* === PASEK POSTĘPU === */}
@@ -360,6 +363,24 @@ const styles = StyleSheet.create({
   },
   songInfo: {
     alignItems: 'center',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+  },
+  artist: {
+    fontSize: 16,
+    color: '#555',
+    marginTop: 4,
+  },
+  versionText: {
+    fontSize: 16,
+    color: '#888',
+    fontStyle: 'italic',
+    marginTop: 6,
   },
   progressContainer: {
     width: '100%',
@@ -378,17 +399,6 @@ const styles = StyleSheet.create({
   timeText: {
     color: '#333',
     fontSize: 12,
-  },
-  title: {
-    color: 'black',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  artist: {
-    color: '#333333',
-    fontSize: 16,
-    marginTop: 5,
   },
   controls: {
     marginTop: 10,

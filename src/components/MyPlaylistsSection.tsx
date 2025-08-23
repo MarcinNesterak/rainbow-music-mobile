@@ -62,22 +62,25 @@ const PlaylistTile = ({ item }: { item: Playlist }) => {
 
 const MyPlaylistsSection = () => {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
-  const { user } = useAuth();
+  const { session } = useAuth(); // Zmieniamy user na session
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchPlaylists = useCallback(async () => {
-    if (!user) return;
+    if (!session?.user) { // Sprawdzamy, czy istnieje sesja i użytkownik
+      setPlaylists([]); // Czyścimy playlisty, jeśli użytkownik nie jest zalogowany
+      return;
+    };
     try {
       setLoading(true);
-      const userPlaylists = await getUserPlaylists(user.id);
+      const userPlaylists = await getUserPlaylists(session.user.id);
       setPlaylists(userPlaylists);
     } catch (error: any) {
       Alert.alert('Błąd', 'Nie udało się pobrać playlist.');
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [session]); // Zależność od sesji, a nie od użytkownika
 
   useFocusEffect(
     useCallback(() => {

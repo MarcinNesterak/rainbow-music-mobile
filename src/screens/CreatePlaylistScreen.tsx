@@ -8,7 +8,8 @@ import { createPlaylist } from '../services/api';
 import GlobalBackground from '../components/GlobalBackground';
 
 const a_playlist_background_colors = [
-  '#FFC107', '#FF5722', '#E91E63', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A'
+  '#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#073B4C',
+  '#F08A5D', '#B83B5E', '#6A2C70', '#F3B49F', '#F8F1F1'
 ];
 
 const getRandomColor = () => {
@@ -17,7 +18,7 @@ const getRandomColor = () => {
 
 const CreatePlaylistScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
-  const { user } = useAuth();
+  const { session } = useAuth();
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,14 +27,14 @@ const CreatePlaylistScreen = () => {
       Alert.alert('Błąd', 'Nazwa playlisty nie może być pusta.');
       return;
     }
-    if (!user) {
+    if (!session?.user) {
       Alert.alert('Błąd', 'Musisz być zalogowany, aby tworzyć playlisty.');
       return;
     }
 
     setLoading(true);
     try {
-      await createPlaylist(name, user.id, getRandomColor());
+      await createPlaylist(name, session.user.id, getRandomColor());
       Alert.alert('Sukces!', 'Twoja playlista została utworzona.');
       navigation.goBack(); // Wracamy do ekranu głównego
     } catch (error: any) {
