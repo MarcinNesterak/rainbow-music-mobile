@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { supabase } from '../services/supabase';
+import GlobalBackground from '../components/GlobalBackground';
 
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -18,23 +19,22 @@ const RegisterScreen = () => {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
 
-    setLoading(false);
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      Alert.alert('Sukces!', 'Sprawdź swoją skrzynkę mailową, aby potwierdzić rejestrację.');
+
+    } catch (error: any) {
       Alert.alert('Błąd rejestracji', error.message);
-    } else if (data.session) {
-      // Automatyczne zalogowanie po udanej rejestracji
-      Alert.alert('Sukces', 'Rejestracja pomyślna! Zostałeś zalogowany.');
-    } else if (data.user) {
-        Alert.alert(
-            'Sukces',
-            'Rejestracja pomyślna! Sprawdź swoją skrzynkę mailową, aby potwierdzić konto.'
-        );
-        navigation.navigate('Login');
+    } finally {
+      setLoading(false);
     }
   };
 

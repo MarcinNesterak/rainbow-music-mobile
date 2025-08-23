@@ -1,68 +1,54 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
-import GlobalBackground from '../components/GlobalBackground';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../services/supabase';
+import GlobalBackground from '../components/GlobalBackground';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../services/supabase'; // Import supabase
 
 const ProfileScreen = () => {
-  const { session, signOut } = useAuth();
+  const { session, profile } = useAuth();
 
-  const handleSignOut = async () => {
-    signOut();
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      Alert.alert('Błąd', 'Wystąpił błąd podczas wylogowywania.');
+      console.error('Błąd wylogowywania:', error);
+    }
+    // AuthContext samoczynnie wykryje zmianę stanu i przełączy widok na ekran logowania
   };
 
-  const handleChangePassword = () => {
-    Alert.alert(
-      "Zmiana hasła",
-      "Funkcja zmiany hasła jest w trakcie przygotowania. Wkrótce będzie dostępna."
-    );
+  const handlePasswordChange = () => {
+    Alert.alert('Funkcja niedostępna', 'Zmiana hasła będzie dostępna w przyszłości.');
   };
-  
+
   const handleDeleteAccount = () => {
-    Alert.alert(
-      "Usuwanie konta",
-      "Czy na pewno chcesz trwale usunąć swoje konto? Tej operacji nie można cofnąć.",
-      [
-        { text: 'Anuluj', style: 'cancel' },
-        {
-          text: 'Usuń',
-          style: 'destructive',
-          onPress: async () => {
-            Alert.alert(
-              "Procedura usunięcia konta",
-              "Funkcja usuwania konta jest w trakcie przygotowania. Prosimy o kontakt z administratorem."
-            );
-          },
-        },
-      ]
-    );
+    Alert.alert('Funkcja niedostępna', 'Usuwanie konta będzie dostępne w przyszłości.');
   };
 
   return (
     <GlobalBackground>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profil</Text>
-        </View>
-        
         <View style={styles.content}>
-          <View style={styles.infoSection}>
-            <Text style={styles.label}>Adres e-mail</Text>
-            <Text style={styles.value}>{session?.user?.email}</Text>
+          <Text style={styles.title}>Twój Profil</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.value}>{session?.user?.email || 'Brak danych'}</Text>
           </View>
-          <View style={styles.infoSection}>
-            <Text style={styles.label}>Status subskrypcji</Text>
-            <Text style={styles.value}>Darmowa</Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Status subskrypcji:</Text>
+            <Text style={[styles.value, styles.statusValue]}>
+              {profile?.subscription_status === 'premium' ? 'Premium' : 'Darmowa'}
+            </Text>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+          <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
             <Text style={styles.buttonText}>Zmień hasło</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleSignOut}>
-            <Text style={styles.buttonText}>Wyloguj się</Text>
+          <TouchableOpacity style={styles.button} onPress={handleDeleteAccount}>
+            <Text style={styles.buttonText}>Usuń konto</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.destructiveButton]} onPress={handleDeleteAccount}>
-            <Text style={[styles.buttonText, styles.destructiveButtonText]}>Usuń konto</Text>
+          <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+            <Text style={[styles.buttonText, styles.logoutButtonText]}>Wyloguj się</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -76,7 +62,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    paddingTop: 20, // Changed from Platform.OS === 'android' ? 40 : 20
     paddingBottom: 10,
   },
   headerTitle: {
@@ -115,6 +101,25 @@ const styles = StyleSheet.create({
   },
   destructiveButtonText: {
     color: '#FF3B30',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  infoContainer: {
+    marginBottom: 20,
+  },
+  statusValue: {
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    marginTop: 10,
+  },
+  logoutButtonText: {
+    color: 'white',
   },
 });
 
