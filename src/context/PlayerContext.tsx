@@ -1,10 +1,13 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
 import Sound from 'react-native-sound';
 import { Song } from '../services/api';
-import { supabase } from '../services/supabase'; // Importujemy klienta Supabase
+import { supabase } from '../services/supabase';
 
 // Włączamy obsługę audio z sieci
 Sound.setCategory('Playback');
+
+type VersionType = 'vocal' | 'instrumental';
 
 interface PlayerContextType {
   isPlaying: boolean;
@@ -16,6 +19,7 @@ interface PlayerContextType {
   progress: number; // Postęp jako wartość 0-1
   duration: number; // Czas trwania w sekundach
   currentTime: number; // Aktualny czas w sekundach
+  currentVersion: VersionType;
   playSong: (song: Song, imageUrl?: string | null, color?: string) => void; // <-- Zmieniona funkcja
   pauseSong: () => void;
   resumeSong: () => void;
@@ -23,6 +27,7 @@ interface PlayerContextType {
   hidePlayer: () => void;
   stopSong: () => void;
   seekTo: (position: number) => void; // <-- Nowa funkcja do przewijania
+  switchVersion: (version: VersionType) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -41,6 +46,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState<VersionType>('vocal');
 
   const cleanup = () => {
     if (progressInterval) {
@@ -52,59 +58,49 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       soundInstance = null;
     }
     setIsPlaying(false);
-    setCurrentTrack(null);
-    setCurrentTrackArtUrl(null); // <-- Resetuj grafikę
-    setPlaceholderColor(null); // <-- Resetuj kolor
+    // Nie czyścimy currentTrack i art, aby umożliwić przełączanie wersji
     setIsLoading(false);
     setProgress(0);
     setDuration(0);
     setCurrentTime(0);
-    // isPlayerVisible jest resetowane przez funkcje, które wołają cleanup
   };
 
-  const stopSong = useCallback(() => {
-    cleanup();
-    hidePlayer(); // Używamy hidePlayer, żeby spójnie zarządzać widocznością
-  }, []);
+  const _playAudioFromPath = useCallback(async (
+    song: Song,
+    path: string,
+    version: VersionType,
+    artUrl?: string | null,
+    color?: string | null
+  ) => {
+    cleanup(); // Czyścimy poprzedni dźwięk i interwał
 
-  const playSong = useCallback(async (song: Song, imageUrl?: string | null, color?: string) => {
-    cleanup(); // Zawsze czyścimy przed odtworzeniem nowej piosenki
-
-    if (!song.audio_file_path) {
-      console.error('Piosenka nie ma ścieżki do pliku audio:', song.title);
-      return;
-    }
-    
     setIsLoading(true);
     setCurrentTrack(song);
-    setCurrentTrackArtUrl(imageUrl || null); // <-- Ustaw grafikę
-    setPlaceholderColor(color || null); // <-- Ustaw kolor
+    setCurrentVersion(version);
+    // Ustawiamy okładkę i kolor tylko, jeśli są jawnie przekazane (przy pierwszym odtworzeniu)
+    if (artUrl !== undefined) setCurrentTrackArtUrl(artUrl);
+    if (color !== undefined) setPlaceholderColor(color);
 
-    // Krok 1: Wygeneruj bezpieczny, tymczasowy URL
     const { data, error: urlError } = await supabase.storage
-      .from('song-audio') // POPRAWIONA NAZWA WIADRA
-      .createSignedUrl(song.audio_file_path, 60 * 5); // Ważny przez 5 minut
+      .from('song-audio')
+      .createSignedUrl(path, 60 * 5);
 
     if (urlError || !data?.signedUrl) {
       console.error('Błąd podczas tworzenia podpisanego URL:', urlError?.message);
-      cleanup();
+      stopSong(); // Używamy stopSong do pełnego wyczyszczenia
       return;
     }
 
-    const signedUrl = data.signedUrl;
-
-    // Krok 2: Użyj tymczasowego URL do odtworzenia dźwięku
-    const newSoundInstance = new Sound(signedUrl, undefined, (error) => {
+    const newSoundInstance = new Sound(data.signedUrl, undefined, (error) => {
       if (error) {
         console.log('Błąd podczas ładowania piosenki', error);
-        cleanup();
+        stopSong();
         return;
       }
-
       soundInstance = newSoundInstance;
       const songDuration = Math.round(soundInstance.getDuration());
       setDuration(songDuration);
-      
+
       progressInterval = setInterval(() => {
         soundInstance?.getCurrentTime((seconds) => {
           setCurrentTime(seconds);
@@ -115,16 +111,47 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }, 250);
 
       soundInstance.play((success) => {
-        if (success) {
-          console.log('Piosenka odtworzona pomyślnie');
-        } else {
-          console.log('Błąd odtwarzania');
-        }
-        stopSong(); // Zatrzymaj i zamknij, gdy piosenka się skończy
+        if (!success) console.log('Błąd odtwarzania');
+        stopSong(); // Zatrzymuje i czyści wszystko po zakończeniu utworu
       });
+
       setIsPlaying(true);
       setIsLoading(false);
     });
+  }, []);
+
+  const playSong = useCallback((song: Song, imageUrl?: string | null, color?: string) => {
+    if (!song.audio_file_path) {
+      console.error('Piosenka nie ma ścieżki do pliku audio:', song.title);
+      return;
+    }
+    _playAudioFromPath(song, song.audio_file_path, 'vocal', imageUrl, color);
+  }, [_playAudioFromPath]);
+
+  const switchVersion = useCallback((version: VersionType) => {
+    if (!currentTrack) return;
+
+    let path: string | null | undefined = null;
+    if (version === 'instrumental') {
+      path = currentTrack.instrumental_file_path;
+    } else {
+      path = currentTrack.audio_file_path;
+    }
+
+    if (!path) {
+      Alert.alert('Brak wersji', `Dla tej piosenki nie ma dostępnej wersji "${version}".`);
+      return;
+    }
+
+    _playAudioFromPath(currentTrack, path, version, currentTrackArtUrl, placeholderColor);
+  }, [currentTrack, currentTrackArtUrl, placeholderColor, _playAudioFromPath]);
+
+  const stopSong = useCallback(() => {
+    cleanup();
+    setCurrentTrack(null);
+    setCurrentTrackArtUrl(null);
+    setPlaceholderColor(null);
+    hidePlayer();
   }, []);
 
   const pauseSong = useCallback(() => {
@@ -167,7 +194,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   // Upewniamy się, że dźwięk jest czyszczony przy zamykaniu aplikacji
   useEffect(() => {
     return () => {
-      cleanup();
+      cleanup(); // Pełne czyszczenie przy odmontowaniu komponentu
+      setCurrentTrack(null);
     };
   }, []);
 
@@ -181,6 +209,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     progress, // <-- Upublicznij
     duration, // <-- Upublicznij
     currentTime, // <-- Upublicznij
+    currentVersion,
     playSong,
     pauseSong,
     resumeSong,
@@ -188,6 +217,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     hidePlayer,
     stopSong, // <-- Upubliczniamy funkcję
     seekTo, // <-- Upublicznij funkcję
+    switchVersion,
   };
 
   return (

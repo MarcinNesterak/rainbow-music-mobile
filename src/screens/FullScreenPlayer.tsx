@@ -28,7 +28,7 @@ const instrumentalIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="28p
 const lyricsIconXml = `<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="28px" viewBox="0 0 24 24" width="28px" fill="#000000"><g><rect fill="none" height="24" width="24"/></g><g><path d="M20,4H4C2.9,4,2,4.9,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V6C22,4.9,21.1,4,20,4z M4,18V6h2v12H4z M13,18V6h2v12H13z M11,18V6h2v12H11z M8,18V6h2v12H8z M18,18h-2V6h2V18z"/></g></svg>`;
 const storeIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 0 24 24" width="28px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5H2l3.43 3.43L6 14l.57.57L9 17l2.43-2.43L12 14l.57.57L15 17l2.43-2.43L18 14l.57.57L22 11h-5c0 2.76-2.24 5-5 5z"/></svg>`;
 const lockIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px" fill="#555555"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`;
-
+const vocalIconXml = `<svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 0 24 24" width="28px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>`
 
 // Funkcja pomocnicza do formatowania czasu
 const formatTime = (seconds: number) => {
@@ -54,6 +54,8 @@ const FullScreenPlayer = () => {
     currentTime,
     placeholderColor, // <-- Pobieramy kolor
     seekTo, // <-- 1. Pobieramy funkcję seekTo
+    currentVersion,
+    switchVersion,
   } = usePlayer();
   const insets = useSafeAreaInsets();
   const [isStoreModalVisible, setStoreModalVisible] = useState(false);
@@ -176,16 +178,29 @@ const FullScreenPlayer = () => {
                     {/* === PRZYCISKI FUNKCYJNE === */}
                     <View style={styles.featuresRow}>
 
-                      <TouchableOpacity style={styles.featureButton}>
-                        <SvgXml xml={instrumentalIconXml} />
-                        <Text style={styles.featureText}>Instrumental</Text>
-                        {!isPremium && <View style={styles.lockIconContainer}><SvgXml xml={lockIconXml} /></View>}
-                      </TouchableOpacity>
+                      {currentVersion === 'vocal' ? (
+                        <TouchableOpacity
+                          style={styles.featureButton}
+                          onPress={() => isPremium ? switchVersion('instrumental') : Alert.alert('Funkcja Premium', 'Wersja instrumentalna jest dostępna tylko w subskrypcji Premium.')}
+                        >
+                          <SvgXml xml={instrumentalIconXml} />
+                          <Text style={styles.featureText}>Instrumental</Text>
+                          {!isPremium && <View style={styles.lockIconContainer}><SvgXml xml={lockIconXml} /></View>}
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          style={styles.featureButton}
+                          onPress={() => switchVersion('vocal')}
+                        >
+                          <SvgXml xml={vocalIconXml} />
+                          <Text style={styles.featureText}>Wokal</Text>
+                        </TouchableOpacity>
+                      )}
 
-                      <TouchableOpacity style={styles.featureButton}>
+                      <TouchableOpacity style={styles.featureButton} onPress={() => Alert.alert('Wkrótce!', 'Teksty piosenek będą dostępne w przyszłości.')}>
                         <SvgXml xml={lyricsIconXml} />
                         <Text style={styles.featureText}>Tekst</Text>
-                         {!isPremium && <View style={styles.lockIconContainer}><SvgXml xml={lockIconXml} /></View>}
+                        {!isPremium && <View style={styles.lockIconContainer}><SvgXml xml={lockIconXml} /></View>}
                       </TouchableOpacity>
 
                       <TouchableOpacity style={styles.featureButton} onPress={handleStorePress}>
@@ -232,7 +247,7 @@ const FullScreenPlayer = () => {
               <TouchableOpacity style={styles.storeModalBackdrop} onPress={() => setStoreModalVisible(false)} activeOpacity={1}>
                 <TouchableOpacity activeOpacity={1} style={styles.storeModalContainer}>
                   <Text style={styles.storeModalTitle}>Wybierz wersję</Text>
-                  
+
                   {currentTrack.store_url && (
                     <TouchableOpacity
                       style={styles.storeModalButton}
