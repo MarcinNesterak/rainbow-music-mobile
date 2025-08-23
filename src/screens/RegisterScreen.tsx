@@ -11,6 +11,7 @@ const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState(''); // Nowy stan dla nazwy użytkownika
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
@@ -18,11 +19,20 @@ const RegisterScreen = () => {
       Alert.alert('Błąd', 'Hasła nie są takie same.');
       return;
     }
+    if (!displayName.trim()) {
+      Alert.alert('Błąd', 'Proszę podać nazwę użytkownika.');
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
+        options: {
+          data: {
+            display_name: displayName, // Przekazanie nazwy użytkownika
+          },
+        },
       });
 
       if (error) {
@@ -43,6 +53,13 @@ const RegisterScreen = () => {
       <Text style={styles.title}>Stwórz konto</Text>
       <Text style={styles.subtitle}>Dołącz do naszej społeczności!</Text>
       
+      <TextInput
+        style={styles.input}
+        placeholder="Nazwa użytkownika"
+        value={displayName}
+        onChangeText={setDisplayName}
+        autoCapitalize="none"
+      />
       <TextInput
         style={styles.input}
         placeholder="Adres e-mail"

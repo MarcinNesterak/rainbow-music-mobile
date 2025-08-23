@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import debounce from 'lodash.debounce';
 import { searchSongs, Song } from '../services/api';
 import MyPlaylistsSection from '../components/MyPlaylistsSection';
 import SearchBar from '../components/SearchBar';
 import CategoriesSection from '../components/CategoriesSection';
-import AlbumsSection from '../components/AlbumsSection'; // Import nowej sekcji
+import AlbumsSection from '../components/AlbumsSection';
+import { useAuth } from '../context/AuthContext';
+import { usePlayer } from '../context/PlayerContext'; // Krok 1: Import usePlayer
 
 // Komponent do wyświetlania wyników wyszukiwania
-const SearchResults = ({ results, isLoading, error }: { results: Song[], isLoading: boolean, error: string | null }) => {
+const SearchResults = ({ results, isLoading, error, onSongPress }: { results: Song[], isLoading: boolean, error: string | null, onSongPress: (song: Song) => void }) => {
   if (isLoading) {
     return <ActivityIndicator style={{ marginVertical: 20 }} color="#6E44FF" />;
   }
@@ -16,7 +18,7 @@ const SearchResults = ({ results, isLoading, error }: { results: Song[], isLoadi
     return <Text style={styles.errorText}>Błąd wyszukiwania: {error}</Text>;
   }
   if (results.length === 0) {
-    return null; // Nie pokazuj nic, jeśli nie ma wyników
+    return null;
   }
 
   return (
@@ -25,9 +27,11 @@ const SearchResults = ({ results, isLoading, error }: { results: Song[], isLoadi
         data={results}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.resultItem}>
+          // Krok 2: Uczynienie elementu klikalnym
+          <TouchableOpacity onPress={() => onSongPress(item)} style={styles.resultItem}>
             <Text style={styles.resultTitle}>{item.title}</Text>
-          </View>
+            <Text style={styles.resultArtist}>{item.artist}</Text>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -35,6 +39,8 @@ const SearchResults = ({ results, isLoading, error }: { results: Song[], isLoadi
 };
 
 const HomeScreen = () => {
+  const { session } = useAuth();
+  const { playSong, showPlayer } = usePlayer(); // Krok 3: Pobranie funkcji z kontekstu
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -72,16 +78,26 @@ const HomeScreen = () => {
     setSearchResults([]);
   };
 
+  // Krok 4: Funkcja do obsługi naciśnięcia piosenki
+  const handleSongPress = (song: Song) => {
+    playSong(song);
+    showPlayer();
+    clearSearch(); // Opcjonalnie: wyczyść wyszukiwanie po wybraniu piosenki
+  };
+
   const showResults = searchQuery.length > 1;
 
   return (
     <TouchableWithoutFeedback onPress={clearSearch} disabled={!showResults}>
       <SafeAreaView style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled">
-          <Text style={styles.headerTitle}>Witaj, Marcin!</Text>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerTitle}>
+              Witaj, {session?.user?.user_metadata.display_name || session?.user?.email || 'Gościu'}!
+            </Text>
+          </View>
           <View onLayout={(event) => {
               const { y, height } = event.nativeEvent.layout;
-              // Dodajemy 10 pikseli marginesu z góry nagłówka
               setSearchBarLayout({ y: y + 20, height });
             }}>
             <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
@@ -100,7 +116,12 @@ const HomeScreen = () => {
             ]}
             onStartShouldSetResponder={() => true}
           >
-            <SearchResults results={searchResults} isLoading={isSearching} error={searchError} />
+            <SearchResults 
+              results={searchResults} 
+              isLoading={isSearching} 
+              error={searchError} 
+              onSongPress={handleSongPress} // Krok 5: Przekazanie funkcji
+            />
           </View>
         )}
       </SafeAreaView>
@@ -111,14 +132,19 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent', // Przywracamy przezroczyste tło
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, // Dodajemy padding dla Androida
+    backgroundColor: 'transparent',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  // Krok 6: Naprawa błędu - dodanie brakującego stylu
+  headerContainer: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 10,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    margin: 20,
-    marginBottom: 10,
+    color: '#000000', // Zmiana koloru na czarny
   },
   resultsOverlay: {
     position: 'absolute',
@@ -140,18 +166,25 @@ const styles = StyleSheet.create({
     margin: 15,
   },
   resultsContainer: {
-    marginHorizontal: 0, // Usunięty margines, bo jest już w `resultsOverlay`
+    marginHorizontal: 0,
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
-    maxHeight: 300, // Zwiększona maksymalna wysokość
+    maxHeight: 300,
   },
   resultItem: {
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
   },
   resultTitle: {
     fontSize: 16,
+    fontWeight: '500',
+  },
+  resultArtist: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
   },
 });
 
