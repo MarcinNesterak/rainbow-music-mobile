@@ -134,15 +134,16 @@ export const getUserPlaylists = async (userId: string): Promise<Playlist[]> => {
 /**
  * Tworzy nową playlistę.
  */
-export const createPlaylist = async (name: string, userId: string, color: string): Promise<Playlist> => {
-    const { data, error } = await supabase
-      .from('playlists')
-      .insert({ name, user_id: userId, cover_color: color })
-      .select()
-      .single();
+export const createPlaylist = async (name: string, userId: string, color: string) => {
+  const { data, error } = await supabase
+    .from('playlists')
+    .insert([{ name, user_id: userId, cover_color: color }])
+    .select();
 
-    if (error) throw new Error(error.message);
-    return data;
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
 }
 
 /**

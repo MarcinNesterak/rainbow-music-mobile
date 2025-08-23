@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
@@ -45,24 +45,22 @@ const CreatePlaylistScreen = () => {
 
   return (
     <GlobalBackground>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.title}>Stwórz nową playlistę</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Np. Wieczorne przeboje"
-            value={name}
-            onChangeText={setName}
-            placeholderTextColor="#8E8E93"
-          />
-          <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Zapisz playlistę</Text>}
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <Text style={styles.title}>Stwórz nową playlistę</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Np. Wieczorne przeboje"
+          value={name}
+          onChangeText={setName}
+          placeholderTextColor="#8E8E93"
+        />
+        <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={loading}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Zapisz playlistę</Text>}
+        </TouchableOpacity>
+      </ScrollView>
     </GlobalBackground>
   );
 };
@@ -76,6 +74,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: 'transparent', // Upewniamy się, że tło jest przezroczyste
   },
   title: {
     fontSize: 24,

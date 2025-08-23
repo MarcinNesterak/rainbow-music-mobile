@@ -22,6 +22,7 @@ interface PlayerContextType {
   showPlayer: () => void;
   hidePlayer: () => void;
   stopSong: () => void;
+  seekTo: (position: number) => void; // <-- Nowa funkcja do przewijania
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -153,6 +154,16 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setIsPlayerVisible(false);
   };
 
+  const seekTo = (position: number) => {
+    if (soundInstance && duration > 0) {
+      const newTime = position * duration;
+      soundInstance.setCurrentTime(newTime);
+      // Od razu zaktualizuj stany, żeby suwak się nie cofał
+      setCurrentTime(newTime);
+      setProgress(position);
+    }
+  };
+
   // Upewniamy się, że dźwięk jest czyszczony przy zamykaniu aplikacji
   useEffect(() => {
     return () => {
@@ -176,6 +187,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     showPlayer,
     hidePlayer,
     stopSong, // <-- Upubliczniamy funkcję
+    seekTo, // <-- Upublicznij funkcję
   };
 
   return (
