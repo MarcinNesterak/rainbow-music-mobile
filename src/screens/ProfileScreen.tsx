@@ -21,35 +21,31 @@ const ProfileScreen = () => {
     Alert.alert('Funkcja niedostępna', 'Zmiana hasła będzie dostępna w przyszłości.');
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert('Funkcja niedostępna', 'Usuwanie konta będzie dostępne w przyszłości.');
-  };
-
   return (
     <GlobalBackground>
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.title}>Twój Profil</Text>
-          <View style={styles.infoContainer}>
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{session?.user?.email || 'Brak danych'}</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <Text style={styles.label}>Status subskrypcji:</Text>
-            <Text style={[styles.value, styles.statusValue]}>
-              {profile?.subscription_status === 'premium' ? 'Premium' : 'Darmowa'}
-            </Text>
+          <View style={styles.mainContent}>
+            <Text style={styles.title}>Twój Profil</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Email:</Text>
+              <Text style={styles.value}>{session?.user?.email || 'Brak danych'}</Text>
+            </View>
+            <View style={styles.infoContainer}>
+              <Text style={styles.label}>Status subskrypcji:</Text>
+              <Text style={[styles.value, styles.statusValue]}>
+                {profile?.subscription_status === 'premium' ? 'Premium' : 'Darmowa'}
+              </Text>
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
+              <Text style={styles.buttonText}>Zmień hasło</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+              <Text style={[styles.buttonText, styles.logoutButtonText]}>Wyloguj się</Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handlePasswordChange}>
-            <Text style={styles.buttonText}>Zmień hasło</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleDeleteAccount}>
-            <Text style={styles.buttonText}>Usuń konto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
-            <Text style={[styles.buttonText, styles.logoutButtonText]}>Wyloguj się</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </GlobalBackground>
@@ -73,6 +69,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+    justifyContent: 'flex-start', // Zmiana justowania
+  },
+  mainContent: {
+    // Usunięcie flex: 1
   },
   infoSection: {
     marginBottom: 25,
@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
   },
   destructiveButtonText: {
     color: '#FF3B30',
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 24,
