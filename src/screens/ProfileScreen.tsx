@@ -4,9 +4,18 @@ import { useAuth } from '../context/AuthContext';
 import GlobalBackground from '../components/GlobalBackground';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase'; // Import supabase
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ProfileStackParamList } from '../navigation/ProfileStackNavigator';
+
+type ProfileScreenNavigationProp = StackNavigationProp<
+  ProfileStackParamList,
+  'Profile'
+>;
 
 const ProfileScreen = () => {
   const { session, profile } = useAuth();
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -18,7 +27,7 @@ const ProfileScreen = () => {
   };
 
   const handlePasswordChange = () => {
-    Alert.alert('Funkcja niedostępna', 'Zmiana hasła będzie dostępna w przyszłości.');
+    navigation.navigate('ChangePassword');
   };
 
   return (

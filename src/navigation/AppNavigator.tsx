@@ -6,7 +6,7 @@ import HomeStackNavigator, { HomeStackParamList } from './HomeStackNavigator';
 import PlaceholderScreen from '../screens/PlaceholderScreen';
 import CustomTabBar from '../components/CustomTabBar';
 import FavoritesScreen from '../screens/FavoritesScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileStackNavigator from './ProfileStackNavigator';
 
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
@@ -55,7 +55,7 @@ const MainTabNavigator = () => {
         })}
       />
       <Tab.Screen name="Ulubione" component={FavoritesScreen} />
-      <Tab.Screen name="Profil" component={ProfileScreen} />
+      <Tab.Screen name="Profil" component={ProfileStackNavigator} />
     </Tab.Navigator>
   );
 }
