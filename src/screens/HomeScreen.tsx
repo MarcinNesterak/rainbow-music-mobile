@@ -92,7 +92,11 @@ const HomeScreen = () => {
       <SafeAreaView style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled">
           <View style={styles.headerContainer}>
-            <Text style={styles.headerTitle}>
+            <Text 
+              style={styles.headerTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               Witaj, {session?.user?.user_metadata.display_name || session?.user?.email || 'Gościu'}!
             </Text>
           </View>
