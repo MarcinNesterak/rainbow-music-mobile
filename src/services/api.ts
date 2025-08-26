@@ -65,6 +65,40 @@ export const getAllSongs = async (): Promise<Song[]> => {
   return data || [];
 };
 
+/**
+ * Zlicza najnowsze piosenki (np. z ostatnich 30 dni).
+ */
+export const getNewSongsCount = async (): Promise<number> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { count, error } = await supabase
+    .from('songs')
+    .select('*', { count: 'exact', head: true }) // Kluczowe dla wydajności
+    .gte('created_at', thirtyDaysAgo.toISOString());
+
+  if (error) throw new Error(error.message);
+  return count || 0;
+};
+
+
+/**
+ * Pobiera najnowsze piosenki (np. z ostatnich 30 dni).
+ */
+export const getNewSongs = async (): Promise<Song[]> => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data, error } = await supabase
+    .from('songs')
+    .select('*')
+    .gte('created_at', thirtyDaysAgo.toISOString())
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data || [];
+};
+
 
 // --- OPERACJE NA ALBUMACH (ALBUMS) ---
 

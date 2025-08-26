@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, ScrollView, Text, View, ActivityIndicator, FlatList, TouchableWithoutFeedback, SafeAreaView, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import debounce from 'lodash.debounce';
-import { searchSongs, Song } from '../services/api';
+import { searchSongs, Song, getNewSongsCount } from '../services/api';
 import MyPlaylistsSection from '../components/MyPlaylistsSection';
 import SearchBar from '../components/SearchBar';
 import CategoriesSection from '../components/CategoriesSection';
 import AlbumsSection from '../components/AlbumsSection';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext'; // Krok 1: Import usePlayer
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../navigation/HomeStackNavigator';
+import NewReleasesSection from '../components/NewReleasesSection';
+import LinearGradient from 'react-native-linear-gradient';
 
 // Komponent do wyświetlania wyników wyszukiwania
 const SearchResults = ({ results, isLoading, error, onSongPress }: { results: Song[], isLoading: boolean, error: string | null, onSongPress: (song: Song) => void }) => {
@@ -39,6 +44,7 @@ const SearchResults = ({ results, isLoading, error, onSongPress }: { results: So
 };
 
 const HomeScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const { session } = useAuth();
   const { playSong, showPlayer } = usePlayer(); // Krok 3: Pobranie funkcji z kontekstu
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +52,22 @@ const HomeScreen = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchBarLayout, setSearchBarLayout] = useState<{ y: number; height: number } | null>(null);
+  const [newSongsCount, setNewSongsCount] = useState(0);
+
+  // Używamy useFocusEffect, aby licznik odświeżał się przy powrocie na ekran
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCount = async () => {
+        try {
+          const count = await getNewSongsCount();
+          setNewSongsCount(count);
+        } catch (error) {
+          console.error("Nie udało się pobrać liczby nowości:", error);
+        }
+      };
+      fetchCount();
+    }, [])
+  );
 
   const performSearch = async (query: string) => {
     if (query.length < 2) {
@@ -109,6 +131,26 @@ const HomeScreen = () => {
           
           <MyPlaylistsSection />
           <AlbumsSection /> 
+          
+          {/* Przycisk Nowości */}
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('NewReleases')}
+          >
+            <LinearGradient
+              colors={['#FFD1DC', '#FFFFB5', '#D1FFD1', '#B5E8FF', '#D1B5FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.sectionButton}
+            >
+              <Text style={styles.sectionButtonText}>Nowości</Text>
+              {newSongsCount > 0 && (
+                <View style={styles.badgeContainer}>
+                  <Text style={styles.badgeText}>{newSongsCount}</Text>
+                </View>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+
           <CategoriesSection /> 
         </ScrollView>
 
@@ -189,6 +231,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 2,
+  },
+  sectionButton: {
+    padding: 20,
+    borderRadius: 15,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    flexDirection: 'row', // Aby badge pozycjonował się poprawnie
+    justifyContent: 'center', // Wyśrodkowanie tekstu
+  },
+  sectionButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

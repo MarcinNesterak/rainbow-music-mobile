@@ -10,15 +10,17 @@ import CreatePlaylistScreen from '../screens/CreatePlaylistScreen';
 import PlaylistDetailsScreen from '../screens/PlaylistDetailsScreen';
 import PlaylistsScreen from '../screens/PlaylistsScreen';
 import AddToPlaylistScreen from '../screens/AddToPlaylistScreen';
+import NewReleasesScreen from '../screens/NewReleasesScreen';
 
 export type HomeStackParamList = {
   HomeDashboard: undefined;
   Albums: undefined;
   Categories: undefined;
   Playlists: undefined;
+  NewReleases: undefined;
   SongList: { type: 'album' | 'category' | 'all'; id?: string; name:string; imageUrl?: string | null };
   CreatePlaylist: undefined;
-  PlaylistDetails: { playlistId: string; playlistName: string };
+  PlaylistDetails: { playlistId: string; playlistName: string, coverColor: string | null };
   AddToPlaylist: { songId: string };
 };
 
@@ -42,6 +44,7 @@ const HomeStackNavigator = () => {
       <Stack.Screen name="CreatePlaylist" component={CreatePlaylistScreen} options={{ title: 'Nowa playlista' }} />
       <Stack.Screen name="PlaylistDetails" component={PlaylistDetailsScreen} options={({ route }) => ({ title: route.params.playlistName })} />
       <Stack.Screen name="SongList" component={SongListScreen} />
+      <Stack.Screen name="NewReleases" component={NewReleasesScreen} options={{ title: 'Nowości' }} />
       <Stack.Screen 
         name="AddToPlaylist" 
         component={AddToPlaylistScreen} 
