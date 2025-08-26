@@ -19,7 +19,7 @@ const PlaylistDetailsScreen = () => {
   const { playlistId, imageUrl, coverColor } = route.params; // <-- Pobieramy coverColor
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
-  const { playSong, showPlayer } = usePlayer(); // <-- Pobieramy funkcje
+  const { playQueue } = usePlayer(); // <-- Pobieramy funkcje
 
   // Modal-related state
   const [isModalVisible, setModalVisible] = useState(false);
@@ -53,9 +53,8 @@ const PlaylistDetailsScreen = () => {
     }, [fetchSongs])
   );
 
-  const handleSongPress = (song: Song) => {
-    playSong(song, imageUrl, coverColor); // <-- Przekazujemy coverColor
-    showPlayer();
+  const handleSongPress = (index: number) => {
+    playQueue(songs, index, imageUrl, coverColor);
   };
 
   const handleRemoveSong = (songToRemove: Song) => {
@@ -84,8 +83,8 @@ const PlaylistDetailsScreen = () => {
     );
   };
 
-  const renderSongItem = ({ item }: { item: Song }) => (
-    <TouchableOpacity style={styles.songItem} onPress={() => handleSongPress(item)}>
+  const renderSongItem = ({ item, index }: { item: Song, index: number }) => (
+    <TouchableOpacity style={styles.songItem} onPress={() => handleSongPress(index)}>
       <View style={styles.songInfo}>
         <Text style={styles.songTitle}>{item.title}</Text>
         <Text style={styles.songArtist}>{item.artist}</Text>

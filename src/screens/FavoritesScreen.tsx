@@ -13,7 +13,7 @@ const heartIconXml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 const FavoritesScreen = () => {
   const { session } = useAuth();
   const { removeFavorite } = useFavorites(); // Pobieramy tylko funkcję do usuwania
-  const { playSong, showPlayer } = usePlayer();
+  const { playQueue } = usePlayer();
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,13 +43,12 @@ const FavoritesScreen = () => {
     await removeFavorite(songId);
   };
 
-  const handleSongPress = (song: Song) => {
-    playSong(song);
-    showPlayer();
+  const handleSongPress = (index: number) => {
+    playQueue(songs, index);
   };
 
-  const renderFavoriteItem = ({ item }: { item: Song }) => (
-    <TouchableOpacity style={styles.songItem} onPress={() => handleSongPress(item)}>
+  const renderFavoriteItem = ({ item, index }: { item: Song, index: number }) => (
+    <TouchableOpacity style={styles.songItem} onPress={() => handleSongPress(index)}>
       <View style={styles.songInfo}>
         <Text style={styles.songTitle}>{item.title}</Text>
         <Text style={styles.songArtist}>{item.artist}</Text>

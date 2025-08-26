@@ -7,6 +7,7 @@ import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useAuth } from '../context/AuthContext';
 import { deletePlaylist, getUserPlaylists, Playlist } from '../services/api';
 import GlobalBackground from '../components/GlobalBackground';
+import AddPlaylistButton from '../components/AddPlaylistButton'; // Importujemy przycisk
 
 const a_playlist_background_colors = [
   '#FFC107', '#FF5722', '#E91E63', '#9C27B0', '#3F51B5', '#03A9F4', '#009688', '#8BC34A'
@@ -50,6 +51,7 @@ const PlaylistItem = ({ item, onDelete }: { item: Playlist, onDelete: () => void
 };
 
 const PlaylistsScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const { session } = useAuth(); // Zmieniamy user na session
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const headerHeight = useHeaderHeight();
@@ -72,19 +74,30 @@ const PlaylistsScreen = () => {
   const handleDeletePlaylist = async (playlistId: string) => {
     try {
       await deletePlaylist(playlistId);
-      Alert.alert('Sukces', 'Playlista została usunięta.');
       fetchPlaylists(); // Odświeżamy listę
     } catch (error) {
       Alert.alert('Błąd', 'Nie udało się usunąć playlisty.');
     }
   };
 
+  const handleAddPlaylist = () => {
+    navigation.navigate('CreatePlaylist');
+  };
+
+  // Dodajemy "przycisk" jako pierwszy element do danych
+  const data = [{ id: 'add-button', name: '' }, ...playlists];
+
   return (
     <GlobalBackground>
       <SafeAreaView style={styles.container}>
         <FlatList
-          data={playlists}
-          renderItem={({ item }) => <PlaylistItem item={item} onDelete={() => handleDeletePlaylist(item.id)} />}
+          data={data}
+          renderItem={({ item }) => {
+            if (item.id === 'add-button') {
+              return <AddPlaylistButton onPress={handleAddPlaylist} style={styles.gridItem} />;
+            }
+            return <PlaylistItem item={item} onDelete={() => handleDeletePlaylist(item.id)} />;
+          }}
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}

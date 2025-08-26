@@ -27,7 +27,7 @@ const SongListScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const { playSong, showPlayer } = usePlayer();
+  const { playQueue } = usePlayer();
   
   // Modal-related state
   const [isModalVisible, setModalVisible] = useState(false);
@@ -43,9 +43,8 @@ const SongListScreen = () => {
     setSelectedSong(null);
   };
 
-  const handleSongPress = (song: Song) => {
-    playSong(song, imageUrl); // <-- Przekazujemy imageUrl
-    showPlayer();
+  const handleSongPress = (index: number) => {
+    playQueue(songs, index, imageUrl);
   };
 
   useEffect(() => {
@@ -77,7 +76,7 @@ const SongListScreen = () => {
   }, [name, navigation]);
 
 
-  const renderSongItem = ({ item }: { item: Song }) => {
+  const renderSongItem = ({ item, index }: { item: Song, index: number }) => {
     const isSongFavorite = isFavorite(item.id);
 
     const toggleFavorite = () => {
@@ -89,7 +88,7 @@ const SongListScreen = () => {
     };
 
     return (
-      <TouchableOpacity onPress={() => handleSongPress(item)} style={styles.songItem}>
+      <TouchableOpacity onPress={() => handleSongPress(index)} style={styles.songItem}>
         {(type === 'album' || type === 'category') && (
            <Image 
             source={imageUrl ? { uri: imageUrl } : require('../assets/images/logo.png')}

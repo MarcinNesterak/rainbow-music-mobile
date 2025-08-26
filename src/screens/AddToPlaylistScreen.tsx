@@ -31,13 +31,20 @@ const AddToPlaylistScreen = () => {
   
   const handlePlaylistSelect = async (playlist: Playlist) => {
     try {
-      // Sprawdzamy, ile piosenek już jest na playliście, aby dodać nową na końcu
       const existingSongs = await getSongsByPlaylist(playlist.id);
+
+      // Sprawdzamy, czy piosenka już jest na playliście
+      const isAlreadyAdded = existingSongs.some(song => song.id === songId);
+      if (isAlreadyAdded) {
+        Alert.alert('Informacja', 'Ten utwór już znajduje się na tej playliście.');
+        return; // Przerywamy działanie funkcji
+      }
+
+      // Jeśli nie ma, dodajemy ją
       const newOrder = existingSongs.length + 1;
       
       await addSongToPlaylist(playlist.id, songId, newOrder);
       
-      Alert.alert('Sukces', `Dodano piosenkę do playlisty "${playlist.name}"`);
       navigation.goBack();
     } catch (error) {
       Alert.alert('Błąd', 'Nie udało się dodać piosenki do playlisty.');

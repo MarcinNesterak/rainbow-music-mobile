@@ -1,28 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { SvgXml } from 'react-native-svg';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 import { useAuth } from '../context/AuthContext';
 import { getUserPlaylists, Playlist } from '../services/api';
-
-// Prosta ikona plusa w formacie SVG
-const plusIcon = `
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 5V19" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M5 12H19" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`;
-
-const AddPlaylistButton = ({ onPress }: { onPress: () => void }) => {
-  return (
-    <TouchableOpacity style={styles.addButtonItem} onPress={onPress}>
-      <SvgXml xml={plusIcon} width="24" height="24" />
-      <Text style={styles.addButtonTitle}>Dodaj playlistę</Text>
-    </TouchableOpacity>
-  );
-};
+import AddPlaylistButton from './AddPlaylistButton'; // Importujemy nowy komponent
 
 // Typ dla pojedynczej playlisty, przyda się w przyszłości
 // Już zaimportowany z api.ts
@@ -124,21 +107,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingLeft: 20,
     paddingRight: 20,
-  },
-  addButtonItem: {
-    backgroundColor: '#F2F2F7',
-    borderRadius: 15,
-    width: 140,
-    height: 140,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  addButtonTitle: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#000',
   },
   // Ten styl będzie używany dla prawdziwych playlist
   item: {

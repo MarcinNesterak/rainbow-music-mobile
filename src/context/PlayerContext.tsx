@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import Sound from 'react-native-sound';
 import { Song } from '../services/api';
@@ -20,7 +20,11 @@ interface PlayerContextType {
   duration: number; // Czas trwania w sekundach
   currentTime: number; // Aktualny czas w sekundach
   currentVersion: VersionType;
-  playSong: (song: Song, imageUrl?: string | null, color?: string) => void; // <-- Zmieniona funkcja
+  queue: Song[];
+  currentIndex: number | null;
+  playQueue: (songs: Song[], startIndex?: number, imageUrl?: string | null, color?: string | null) => void;
+  playNext: () => void;
+  playPrevious: () => void;
   pauseSong: () => void;
   resumeSong: () => void;
   showPlayer: () => void;
@@ -50,6 +54,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<VersionType>('vocal');
   const [showLyrics, setShowLyrics] = useState(false); // <-- Stan jest teraz tutaj
+  
+  const [queue, setQueue] = useState<Song[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+
+  // Tworzymy ref, który będzie przechowywał najnowszą wersję funkcji playNext
+  const playNextCallbackRef = useRef<() => void>();
 
   const cleanup = () => {
     if (progressInterval) {
@@ -68,6 +78,52 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setCurrentTime(0);
   };
 
+  const showPlayer = () => setIsPlayerVisible(true);
+  const hidePlayer = () => setIsPlayerVisible(false);
+
+  // 1. Definiujemy `stopSong` jako pierwszą, ponieważ nie ma złożonych zależności.
+  const stopSong = useCallback(() => {
+    cleanup();
+    setCurrentTrack(null);
+    setCurrentTrackArtUrl(null);
+    setPlaceholderColor(null);
+    setQueue([]);
+    setCurrentIndex(null);
+    hidePlayer();
+  }, []);
+
+  // Definiujemy playNext - będzie ona aktualizowana i zapisywana w ref
+  const playNext = useCallback(() => {
+    if (currentIndex === null) {
+      stopSong();
+      return;
+    }
+    // Logika odtworzenia następnego utworu - przeniesiona tutaj dla jasności
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= 0 && nextIndex < queue.length) {
+      const songToPlay = queue[nextIndex];
+      if (songToPlay.audio_file_path) {
+        setCurrentIndex(nextIndex);
+        _playAudioFromPath(songToPlay, songToPlay.audio_file_path, 'vocal', currentTrackArtUrl, placeholderColor);
+      } else {
+        console.error(`Piosenka na indeksie ${nextIndex} nie ma ścieżki audio.`);
+        // Rekurencyjne wywołanie, aby pominąć błędny utwór
+        setCurrentIndex(nextIndex); // Musimy zaktualizować indeks, żeby przejść dalej
+        playNextCallbackRef.current?.();
+      }
+    } else {
+      stopSong(); // Koniec kolejki
+    }
+  }, [queue, currentIndex, stopSong, currentTrackArtUrl, placeholderColor]); // <-- Zależności playNext
+
+
+  // Efekt, który aktualizuje ref za każdym razem, gdy `playNext` się zmienia
+  useEffect(() => {
+    playNextCallbackRef.current = playNext;
+  }, [playNext]);
+
+
+  // 2. Definiujemy funkcję do odtwarzania audio. Zależy tylko od `stopSong`.
   const _playAudioFromPath = useCallback(async (
     song: Song,
     path: string,
@@ -91,7 +147,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     if (urlError || !data?.signedUrl) {
       console.error('Błąd podczas tworzenia podpisanego URL:', urlError?.message);
-      stopSong(); // Używamy stopSong do pełnego wyczyszczenia
+      stopSong();
       return;
     }
 
@@ -115,22 +171,75 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }, 250);
 
       soundInstance.play((success) => {
-        if (!success) console.log('Błąd odtwarzania');
-        stopSong(); // Zatrzymuje i czyści wszystko po zakończeniu utworu
+        if (success) {
+          // Zawsze wywołujemy najnowszą wersję funkcji z refa
+          playNextCallbackRef.current?.();
+        } else {
+          console.log('Błąd odtwarzania');
+          stopSong();
+        }
       });
 
       setIsPlaying(true);
       setIsLoading(false);
     });
-  }, []);
+  }, [stopSong]); // Usunęliśmy wszystkie inne zależności, bo są obsługiwane przez ref
 
-  const playSong = useCallback((song: Song, imageUrl?: string | null, color?: string) => {
-    if (!song.audio_file_path) {
-      console.error('Piosenka nie ma ścieżki do pliku audio:', song.title);
-      return;
+  // 3. Definiujemy funkcję pomocniczą do odtwarzania piosenki z kolejki.
+  const _playSongAtIndex = useCallback((index: number) => {
+    if (index >= 0 && index < queue.length) {
+      const songToPlay = queue[index];
+      if (songToPlay.audio_file_path) {
+        setCurrentIndex(index);
+        _playAudioFromPath(songToPlay, songToPlay.audio_file_path, 'vocal', currentTrackArtUrl, placeholderColor);
+      } else {
+        console.error(`Piosenka na indeksie ${index} nie ma ścieżki audio.`);
+        playNext?.(); // Próbuj następną
+      }
+    } else {
+      stopSong(); // Koniec kolejki
     }
-    _playAudioFromPath(song, song.audio_file_path, 'vocal', imageUrl, color);
-  }, [_playAudioFromPath]);
+  }, [queue, _playAudioFromPath, currentTrackArtUrl, placeholderColor, stopSong]);
+
+  // 4. Teraz możemy w pełni zdefiniować `playNext`.
+  // playNext = useCallback(() => {
+  //   if (currentIndex === null) {
+  //     stopSong();
+  //     return;
+  //   }
+  //   _playSongAtIndex(currentIndex + 1);
+  // }, [currentIndex, _playSongAtIndex, stopSong]);
+
+  // 5. Definiujemy resztę funkcji, które są już bezpieczne.
+  const playPrevious = useCallback(() => {
+    if (currentIndex === null) return;
+    const prevIndex = currentIndex - 1;
+    if (prevIndex >= 0 && prevIndex < queue.length) {
+      const songToPlay = queue[prevIndex];
+      if (songToPlay.audio_file_path) {
+        setCurrentIndex(prevIndex);
+        _playAudioFromPath(songToPlay, songToPlay.audio_file_path, 'vocal', currentTrackArtUrl, placeholderColor);
+      } else {
+        // Można dodać logikę do pomijania wstecz, ale na razie to upraszczamy
+        console.error(`Piosenka na indeksie ${prevIndex} nie ma ścieżki audio.`);
+      }
+    }
+  }, [currentIndex, queue, _playAudioFromPath, currentTrackArtUrl, placeholderColor]);
+
+
+  const playQueue = useCallback((songs: Song[], startIndex: number = 0, imageUrl?: string | null, color?: string | null) => {
+    setQueue(songs);
+    const song = songs[startIndex];
+    if (song && song.audio_file_path) {
+      setCurrentIndex(startIndex);
+      _playAudioFromPath(song, song.audio_file_path, 'vocal', imageUrl, color);
+      showPlayer();
+    } else {
+      console.error('Piosenka startowa jest nieprawidłowa', song);
+      stopSong();
+    }
+  }, [_playAudioFromPath, stopSong]);
+
 
   const switchVersion = useCallback((version: VersionType) => {
     if (!currentTrack) return;
@@ -150,14 +259,6 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     _playAudioFromPath(currentTrack, path, version, currentTrackArtUrl, placeholderColor);
   }, [currentTrack, currentTrackArtUrl, placeholderColor, _playAudioFromPath]);
 
-  const stopSong = useCallback(() => {
-    cleanup();
-    setCurrentTrack(null);
-    setCurrentTrackArtUrl(null);
-    setPlaceholderColor(null);
-    hidePlayer();
-  }, []);
-
   const pauseSong = useCallback(() => {
     if (soundInstance) {
       soundInstance.pause();
@@ -168,22 +269,16 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const resumeSong = useCallback(() => {
     if (soundInstance) {
       soundInstance.play((success) => {
-        if (!success) {
+        if (success) {
+          playNextCallbackRef.current?.();
+        } else {
           console.log('Błąd odtwarzania po wznowieniu');
-          stopSong(); // Zatrzymaj i zamknij w razie błędu
+          stopSong();
         }
       });
       setIsPlaying(true);
     }
-  }, []);
-
-  const showPlayer = () => {
-    setIsPlayerVisible(true);
-  };
-
-  const hidePlayer = () => {
-    setIsPlayerVisible(false);
-  };
+  }, [stopSong]); // Zależność tylko od stopSong, playNext jest z refa
 
   const seekTo = (position: number) => {
     if (soundInstance && duration > 0) {
@@ -200,6 +295,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cleanup(); // Pełne czyszczenie przy odmontowaniu komponentu
       setCurrentTrack(null);
+      setQueue([]);
+      setCurrentIndex(null);
     };
   }, []);
 
@@ -214,7 +311,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     duration, // <-- Upublicznij
     currentTime, // <-- Upublicznij
     currentVersion,
-    playSong,
+    queue,
+    currentIndex,
+    playQueue,
+    playNext,
+    playPrevious,
     pauseSong,
     resumeSong,
     showPlayer,
