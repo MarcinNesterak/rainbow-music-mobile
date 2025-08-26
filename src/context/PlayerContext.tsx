@@ -60,8 +60,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   // Tworzymy ref, który będzie przechowywał najnowszą wersję funkcji playNext
   const playNextCallbackRef = useRef<() => void>();
+  // Ref do śledzenia ID bieżącej operacji ładowania
+  const loadingOperationIdRef = useRef<symbol | null>(null);
 
   const cleanup = () => {
+    // Anulujemy bieżącą operację ładowania
+    loadingOperationIdRef.current = null;
     if (progressInterval) {
       clearInterval(progressInterval);
       progressInterval = null;
@@ -141,6 +145,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     if (artUrl !== undefined) setCurrentTrackArtUrl(artUrl);
     if (color !== undefined) setPlaceholderColor(color);
 
+    // Generujemy unikalne ID dla tej operacji
+    const operationId = Symbol();
+    loadingOperationIdRef.current = operationId;
+
     const { data, error: urlError } = await supabase.storage
       .from('song-audio')
       .createSignedUrl(path, 60 * 5);
@@ -151,7 +159,18 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // Sprawdzamy, czy operacja nie została anulowana w międzyczasie
+    if (loadingOperationIdRef.current !== operationId) {
+      return; // Zatrzymujemy wykonanie, jeśli tak
+    }
+
     const newSoundInstance = new Sound(data.signedUrl, undefined, (error) => {
+      // Sprawdzamy ponownie po załadowaniu dźwięku
+      if (loadingOperationIdRef.current !== operationId) {
+        newSoundInstance.release(); // Ważne: zwolnij zasoby, nawet jeśli nie odtwarzamy
+        return;
+      }
+
       if (error) {
         console.log('Błąd podczas ładowania piosenki', error);
         stopSong();
