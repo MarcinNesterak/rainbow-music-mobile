@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 50,
     overflow: 'hidden', // Kluczowe dla BlurView
-    backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.7)' : 'transparent',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
     borderColor: 'rgba(255, 255, 255, 0.5)',
     borderWidth: 1,
     shadowColor: "#000",
