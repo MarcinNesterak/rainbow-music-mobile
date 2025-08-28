@@ -41,8 +41,6 @@ const NewReleasesScreen = () => {
     </TouchableOpacity>
   );
 
-  const ListHeader = () => <View style={{ height: headerHeight }} />;
-
   if (loading) {
     return (
       <GlobalBackground>
@@ -70,7 +68,6 @@ const NewReleasesScreen = () => {
           data={songs}
           renderItem={renderSongItem}
           keyExtractor={(item) => item.id}
-          ListHeaderComponent={ListHeader}
           ListEmptyComponent={
             <View style={[styles.center, { flex: 1 }]}>
               <Text style={styles.errorText}>Brak nowości w ostatnim miesiącu.</Text>

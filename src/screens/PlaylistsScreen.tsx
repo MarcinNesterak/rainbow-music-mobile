@@ -101,7 +101,7 @@ const PlaylistsScreen = () => {
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.listContent}
-          ListHeaderComponent={<Text style={[styles.headerTitle, { marginTop: headerHeight }]}>Moje playlisty</Text>}
+          ListHeaderComponent={<Text style={styles.headerTitle}>Moje playlisty</Text>}
         />
       </SafeAreaView>
     </GlobalBackground>

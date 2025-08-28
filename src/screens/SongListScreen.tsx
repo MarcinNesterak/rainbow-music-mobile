@@ -114,10 +114,6 @@ const SongListScreen = () => {
     );
   };
 
-  const ListHeader = () => (
-    <View style={{ height: headerHeight }} />
-  );
-
   if (loading) {
     return (
       <GlobalBackground>
@@ -145,7 +141,6 @@ const SongListScreen = () => {
           data={songs}
           renderItem={renderSongItem}
           keyExtractor={(item) => item.id}
-          ListHeaderComponent={ListHeader}
           ListEmptyComponent={
             <View style={[styles.center, { flex: 1 }]}>
                 <Text style={styles.errorText}>Brak piosenek w tej kolekcji.</Text>
