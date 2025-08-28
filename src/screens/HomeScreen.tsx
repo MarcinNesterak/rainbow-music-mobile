@@ -11,7 +11,6 @@ import { usePlayer } from '../context/PlayerContext'; // Krok 1: Import usePlaye
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../navigation/HomeStackNavigator';
-import NewReleasesSection from '../components/NewReleasesSection';
 import LinearGradient from 'react-native-linear-gradient';
 
 // Komponent do wyświetlania wyników wyszukiwania
@@ -46,7 +45,7 @@ const SearchResults = ({ results, isLoading, error, onSongPress }: { results: So
 const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const { session } = useAuth();
-  const { playSong, showPlayer } = usePlayer(); // Krok 3: Pobranie funkcji z kontekstu
+  const { playQueue, showPlayer } = usePlayer(); // Krok 3: Pobranie funkcji z kontekstu
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -102,7 +101,7 @@ const HomeScreen = () => {
 
   // Krok 4: Funkcja do obsługi naciśnięcia piosenki
   const handleSongPress = (song: Song) => {
-    playSong(song);
+    playQueue([song]);
     showPlayer();
     clearSearch(); // Opcjonalnie: wyczyść wyszukiwanie po wybraniu piosenki
   };
@@ -135,20 +134,22 @@ const HomeScreen = () => {
           {/* Przycisk Nowości */}
           <TouchableOpacity 
             onPress={() => navigation.navigate('NewReleases')}
+            style={styles.sectionButton}
           >
             <LinearGradient
               colors={['#FFD1DC', '#FFFFB5', '#D1FFD1', '#B5E8FF', '#D1B5FF']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.sectionButton}
-            >
+              style={styles.gradientBackground}
+            />
+            <View style={styles.buttonContentOverlay}>
               <Text style={styles.sectionButtonText}>Nowości</Text>
               {newSongsCount > 0 && (
                 <View style={styles.badgeContainer}>
                   <Text style={styles.badgeText}>{newSongsCount}</Text>
                 </View>
               )}
-            </LinearGradient>
+            </View>
           </TouchableOpacity>
 
           <CategoriesSection /> 
@@ -237,9 +238,17 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginHorizontal: 20,
     marginBottom: 20,
+    // Ten kontener jest teraz tylko pozycjonujący dla nakładki
+  },
+  gradientBackground: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 15,
+  },
+  buttonContentOverlay: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
-    flexDirection: 'row', // Aby badge pozycjonował się poprawnie
-    justifyContent: 'center', // Wyśrodkowanie tekstu
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   sectionButtonText: {
     fontSize: 18,
