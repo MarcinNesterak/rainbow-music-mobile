@@ -89,7 +89,7 @@ const PlaylistsScreen = () => {
 
   return (
     <GlobalBackground>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? headerHeight : 0 }]}>
         <FlatList
           data={data}
           renderItem={({ item }) => {
@@ -112,7 +112,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'transparent',
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     headerTitle: {
         fontSize: 28,

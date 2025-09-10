@@ -117,7 +117,7 @@ const SongListScreen = () => {
   if (loading) {
     return (
       <GlobalBackground>
-        <View style={[styles.container, styles.center]}>
+        <View style={[styles.container, styles.center, { paddingTop: Platform.OS === 'android' ? headerHeight : 0 }]}>
           <ActivityIndicator size="large" color="#6E44FF" />
         </View>
       </GlobalBackground>
@@ -127,7 +127,7 @@ const SongListScreen = () => {
   if (error) {
     return (
       <GlobalBackground>
-        <View style={[styles.container, styles.center]}>
+        <View style={[styles.container, styles.center, { paddingTop: Platform.OS === 'android' ? headerHeight : 0 }]}>
           <Text style={styles.errorText}>Błąd ładowania piosenek: {error}</Text>
         </View>
       </GlobalBackground>
@@ -136,7 +136,7 @@ const SongListScreen = () => {
 
   return (
     <GlobalBackground>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? headerHeight : 0 }]}>
         <FlatList
           data={songs}
           renderItem={renderSongItem}
